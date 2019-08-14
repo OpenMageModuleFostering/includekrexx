@@ -12,14 +12,19 @@
               <sort_order>5</sort_order>
               <action>adminhtml/krexx/config</action>
             </edit>
+            <editlocalconfig translate="title" module="includekrexx">
+              <title>Edit local browser settings</title>
+              <sort_order>10</sort_order>
+              <action>adminhtml/krexx/editlocalconfig</action>
+            </editlocalconfig>
             <editfe translate="title" module="includekrexx">
               <title>Administer FE editing</title>
-              <sort_order>10</sort_order>
+              <sort_order>15</sort_order>
               <action>adminhtml/krexx/feconfig</action>
             </editfe>
             <docu translate="title" module="includekrexx">
               <title>kreXX quick docu</title>
-              <sort_order>15</sort_order>
+              <sort_order>20</sort_order>
               <action>adminhtml/krexx/docu</action>
             </docu>
           </children>
@@ -42,6 +47,9 @@
                   <editfe>
                     <title>Administer kreXX FE Editing</title>
                   </editfe>
+                  <editlocalconfig>
+                    <title>Edit local browser settings</title>
+                  </editlocalconfig>
                   <docu>
                     <title>kreXX quick docu</title>
                   </docu>

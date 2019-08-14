@@ -78,27 +78,6 @@
       </td>
     </tr>
     <tr>
-      <td><label for="jsLib">Path to jQuery</label></td>
-      <td>
-        <select name="render[jsLib]" id="jsLib">
-          <?php foreach($data['settings'] as $key => $value) {
-                if ($key == $settings['render']['jsLib']) {
-                  $selected = 'selected="selected"';
-                }
-                else {
-                  $selected = '';
-                }
-          ?>
-          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php }?>
-        </select>
-      </td>
-      <td>
-        <input id="factory.jsLib" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['jsLib']; ?>/>
-        <label for="factory.jsLib">Use factory settings</label>
-      </td>
-    </tr>
-    <tr>
       <td><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
       <td>
         <select name="render[memoryLeft]" id="memoryLeft">

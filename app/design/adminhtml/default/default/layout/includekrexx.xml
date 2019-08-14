@@ -1,18 +1,28 @@
 <?xml version="1.0"?>
 <layout>
+
   <adminhtml_krexx_docu>
     <reference name="content">
-      <block type="adminhtml/template" name="krexxdocu" template="includekrexx/docu.phtml" />
+      <block type="adminhtml/template" name="krexxdocu" template="includekrexx/docu.phtml"/>
     </reference>
   </adminhtml_krexx_docu>
+
+  <adminhtml_krexx_editlocalconfig>
+      <reference name="content">
+        <block type="adminhtml/template" name="krexxeditlocalconfig" template="includekrexx/editlocalconfig.phtml"/>
+      </reference>
+  </adminhtml_krexx_editlocalconfig>
+
   <adminhtml_krexx_config>
     <reference name="content">
-      <block type="includekrexx/adminhtml_edit_config" name="krexxConfig" template="includekrexx/config.phtml" />
+      <block type="includekrexx/adminhtml_edit_config" name="krexxConfig" template="includekrexx/config.phtml"/>
     </reference>
   </adminhtml_krexx_config>
+
   <adminhtml_krexx_feconfig>
     <reference name="content">
-      <block type="includekrexx/adminhtml_edit_feconfig" name="krexxFeConfig" template="includekrexx/feconfig.phtml" />
+      <block type="includekrexx/adminhtml_edit_feconfig" name="krexxFeConfig" template="includekrexx/feconfig.phtml"/>
     </reference>
   </adminhtml_krexx_feconfig>
+  
 </layout>

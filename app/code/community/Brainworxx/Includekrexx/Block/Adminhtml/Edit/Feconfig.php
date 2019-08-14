@@ -64,26 +64,25 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
     );
 
     // See, if we have any values in the configuration file.
-    $settings['render']['skin'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('skin'));
-    $settings['render']['jsLib'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('jsLib'));
-    $settings['render']['memoryLeft'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('memoryLeft'));
-    $settings['render']['maxRuntime'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('maxRuntime'));
-    $settings['logging']['folder'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('folder'));
-    $settings['logging']['maxfiles'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('maxfiles'));
-    $settings['output']['destination'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('destination'));
-    $settings['output']['maxCall'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('maxCall'));
-    $settings['output']['disabled'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('disabled'));
-    $settings['output']['detectAjax'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('detectAjax'));
-    $settings['deep']['analyseProtected'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('analyseProtected'));
-    $settings['deep']['analysePrivate'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('analysePrivate'));
-    $settings['deep']['analyseTraversable'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('analyseTraversable'));
-    $settings['deep']['debugMethods'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('debugMethods'));
-    $settings['deep']['level'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('level'));
-    $settings['methods']['analysePublicMethods'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('analysePublicMethods'));
-    $settings['methods']['analyseProtectedMethods'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('analyseProtectedMethods'));
-    $settings['methods']['analysePrivateMethods'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('analysePrivateMethods'));
-    $settings['errorHandling']['registerAutomatically'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('registerAutomatically'));
-    $settings['errorHandling']['backtraceAnalysis'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('backtraceAnalysis'));
+    $settings['render']['skin'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('skin'));
+    $settings['render']['memoryLeft'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('memoryLeft'));
+    $settings['render']['maxRuntime'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('maxRuntime'));
+    $settings['logging']['folder'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('folder'));
+    $settings['logging']['maxfiles'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('maxfiles'));
+    $settings['output']['destination'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('destination'));
+    $settings['output']['maxCall'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('maxCall'));
+    $settings['output']['disabled'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('disabled'));
+    $settings['output']['detectAjax'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('detectAjax'));
+    $settings['deep']['analyseProtected'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analyseProtected'));
+    $settings['deep']['analysePrivate'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analysePrivate'));
+    $settings['deep']['analyseTraversable'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analyseTraversable'));
+    $settings['deep']['debugMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('debugMethods'));
+    $settings['deep']['level'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('level'));
+    $settings['methods']['analysePublicMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analysePublicMethods'));
+    $settings['methods']['analyseProtectedMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analyseProtectedMethods'));
+    $settings['methods']['analysePrivateMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analysePrivateMethods'));
+    $settings['errorHandling']['registerAutomatically'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('registerAutomatically'));
+    $settings['errorHandling']['backtraceAnalysis'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('backtraceAnalysis'));
 
     // Are these actually set?
     foreach ($settings as $mainkey => $setting) {
@@ -92,7 +91,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
           $factory[$attribute] = ' checked="checked" ';
           // We need to fill these values with the stuff from the
           // factory settings!
-          $settings[$mainkey][$attribute] = $this->convertKrexxFeSetting(\Krexx\Config::$feConfigFallback[$attribute]);
+          $settings[$mainkey][$attribute] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::$feConfigFallback[$attribute]);
         }
         else {
           $factory[$attribute] = '';

@@ -47,26 +47,25 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
     $factory = array();
 
     // Initialzing help data for the template.
-    $help['skin'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('skin')));
-    $help['jsLib'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('jsLib')));
-    $help['memoryLeft'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('memoryLeft')));
-    $help['maxRuntime'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('maxRuntime')));
-    $help['folder'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('folder')));
-    $help['maxfiles'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('maxfiles')));
-    $help['destination'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('destination')));
-    $help['maxCall'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('maxCall')));
+    $help['skin'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('skin')));
+    $help['memoryLeft'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('memoryLeft')));
+    $help['maxRuntime'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('maxRuntime')));
+    $help['folder'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('folder')));
+    $help['maxfiles'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('maxfiles')));
+    $help['destination'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('destination')));
+    $help['maxCall'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('maxCall')));
     $help['disabled'] = 'Here you can disable kreXX without uninstalling the whole module.';
-    $help['detectAjax'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('detectAjax')));
-    $help['analyseProtected'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('analyseProtected')));
-    $help['analysePrivate'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('analysePrivate')));
-    $help['analyseTraversable'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('analyseTraversable')));
+    $help['detectAjax'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('detectAjax')));
+    $help['analyseProtected'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseProtected')));
+    $help['analysePrivate'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePrivate')));
+    $help['analyseTraversable'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseTraversable')));
     $help['debugMethods'] = "Comma-separated list of used debug callback functions. kreXX will try to call them, if they are available and display their provided data.\nWe Recommend for Magento: '__toArray,toString'";
-    $help['level'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('level')));
-    $help['analysePublicMethods'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('analysePublicMethods')));
-    $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('analyseProtectedMethods')));
-    $help['analysePrivateMethods'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('analysePrivateMethods')));
-    $help['registerAutomatically'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('registerAutomatically')));
-    $help['backtraceAnalysis'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('backtraceAnalysis')));
+    $help['level'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('level')));
+    $help['analysePublicMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePublicMethods')));
+    $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseProtectedMethods')));
+    $help['analysePrivateMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePrivateMethods')));
+    $help['registerAutomatically'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('registerAutomatically')));
+    $help['backtraceAnalysis'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('backtraceAnalysis')));
     $this->assign('help', $help);
 
 
@@ -75,31 +74,30 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
     $this->setSelectBool(array('true' => 'true', 'false' => 'false'));
     $this->setSelectBacktrace(array('normal' => 'normal', 'deep' => 'deep'));
     $skins = array();
-    foreach (Krexx\Render::getSkinList() as $skin) {
+    foreach (\Brainworxx\Krexx\View\Render::getSkinList() as $skin) {
       $skins[$skin] = $skin;
     }
 
     // Get all values from the configuration file.
-    $settings['render']['skin'] = \Krexx\Config::getConfigFromFile('render', 'skin');
-    $settings['render']['jsLib'] = \Krexx\Config::getConfigFromFile('render', 'jsLib');
-    $settings['render']['memoryLeft'] = \Krexx\Config::getConfigFromFile('render', 'memoryLeft');
-    $settings['render']['maxRuntime'] = \Krexx\Config::getConfigFromFile('render', 'maxRuntime');
-    $settings['logging']['folder'] = \Krexx\Config::getConfigFromFile('logging', 'folder');
-    $settings['logging']['maxfiles'] = \Krexx\Config::getConfigFromFile('logging', 'maxfiles');
-    $settings['output']['destination'] = \Krexx\Config::getConfigFromFile('output', 'destination');
-    $settings['output']['maxCall'] = \Krexx\Config::getConfigFromFile('output', 'maxCall');
-    $settings['output']['disabled'] = \Krexx\Config::getConfigFromFile('output', 'disabled');
-    $settings['output']['detectAjax'] = \Krexx\Config::getConfigFromFile('output', 'detectAjax');
-    $settings['deep']['analyseProtected'] = \Krexx\Config::getConfigFromFile('deep', 'analyseProtected');
-    $settings['deep']['analysePrivate'] = \Krexx\Config::getConfigFromFile('deep', 'analysePrivate');
-    $settings['deep']['analyseTraversable'] = \Krexx\Config::getConfigFromFile('deep', 'analyseTraversable');
-    $settings['deep']['debugMethods'] = \Krexx\Config::getConfigFromFile('deep', 'debugMethods');
-    $settings['deep']['level'] = \Krexx\Config::getConfigFromFile('deep', 'level');
-    $settings['methods']['analysePublicMethods'] = \Krexx\Config::getConfigFromFile('methods', 'analysePublicMethods');
-    $settings['methods']['analyseProtectedMethods'] = \Krexx\Config::getConfigFromFile('methods', 'analyseProtectedMethods');
-    $settings['methods']['analysePrivateMethods'] = \Krexx\Config::getConfigFromFile('methods', 'analysePrivateMethods');
-    $settings['errorHandling']['registerAutomatically'] = \Krexx\Config::getConfigFromFile('errorHandling', 'registerAutomatically');
-    $settings['errorHandling']['backtraceAnalysis'] = \Krexx\Config::getConfigFromFile('errorHandling', 'backtraceAnalysis');
+    $settings['render']['skin'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('render', 'skin');
+    $settings['render']['memoryLeft'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('render', 'memoryLeft');
+    $settings['render']['maxRuntime'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('render', 'maxRuntime');
+    $settings['logging']['folder'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('logging', 'folder');
+    $settings['logging']['maxfiles'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('logging', 'maxfiles');
+    $settings['output']['destination'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'destination');
+    $settings['output']['maxCall'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'maxCall');
+    $settings['output']['disabled'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'disabled');
+    $settings['output']['detectAjax'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'detectAjax');
+    $settings['deep']['analyseProtected'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analyseProtected');
+    $settings['deep']['analysePrivate'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analysePrivate');
+    $settings['deep']['analyseTraversable'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analyseTraversable');
+    $settings['deep']['debugMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'debugMethods');
+    $settings['deep']['level'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'level');
+    $settings['methods']['analysePublicMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analysePublicMethods');
+    $settings['methods']['analyseProtectedMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analyseProtectedMethods');
+    $settings['methods']['analysePrivateMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analysePrivateMethods');
+    $settings['errorHandling']['registerAutomatically'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('errorHandling', 'registerAutomatically');
+    $settings['errorHandling']['backtraceAnalysis'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('errorHandling', 'backtraceAnalysis');
 
     // Are these actually set?
     foreach ($settings as $mainkey => $setting) {
@@ -107,7 +105,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
         if (is_null($config)) {
           $factory[$attribute] = ' checked="checked" ';
           // We need to fill these values with the stuff from the factory settings!
-          $settings[$mainkey][$attribute] = \Krexx\Config::$configFallback[$mainkey][$attribute];
+          $settings[$mainkey][$attribute] = \Brainworxx\Krexx\Framework\Config::$configFallback[$mainkey][$attribute];
         }
         else {
           $factory[$attribute] = '';
