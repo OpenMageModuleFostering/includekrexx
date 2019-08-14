@@ -19,6 +19,48 @@
 class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_Controller_Action {
 
   /**
+   * List of all setting-manes for which we are accepting values.
+   *
+   * @var array
+   */
+  protected $allowedSettingsNames = array(
+    'skin',
+    'jsLib',
+    'memoryLeft',
+    'maxRuntime',
+    'folder',
+    'maxfiles',
+    'destination',
+    'useCookies',
+    'maxCall',
+    'disabled',
+    'detectAjax',
+    'analyseProtected',
+    'analysePrivate',
+    'analyseTraversable',
+    'debugMethods',
+    'level',
+    'analysePublicMethods',
+    'analyseProtectedMethods',
+    'analysePrivateMethods',
+    'registerAutomatically',
+    'backtraceAnalysis',
+  );
+
+    /**
+     * List of all sections for which we are accepting values
+     *
+     * @var array
+     */
+    protected $allowedSections = array(
+      'render',
+      'logging',
+      'output',
+      'deep',
+      'methods',
+      'errorHandling');
+
+  /**
    * Standard initilaizing actions.
    *
    * @return Brainworxx_Includekrexx_Adminhtml_KrexxdocuController
@@ -43,67 +85,144 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
   /**
    * The edit action displays configuration editor
    */
-  public function editAction() {
+  public function configAction() {
     $this->init();
-    $this->getLayout()->getBlock('head')->setTitle(Mage::helper('includekrexx')->__('Edit kreXX config file'));
+    $this->getLayout()->getBlock('head')->setTitle(Mage::helper('includekrexx')->__('Edit kreXX Config File'));
+    $this->renderLayout();
+  }
+
+  /**
+   * Displays the fe editing config form
+   */
+  public function feconfigAction() {
+    $this->init();
+    $this->getLayout()->getBlock('head')->setTitle(Mage::helper('includekrexx')->__('Administer krexX FE editing'));
     $this->renderLayout();
   }
 
   /**
    * Saves the form data.
    */
-  public function saveAction() {
+  public function saveconfigAction() {
     $arguments = $this->getRequest()->getPost();
-    $ini = '';
     $all_ok = TRUE;
+    $filepath = \Krexx\Config::getPathToIni();
+    // We must preserve the section 'feEditing'.
+    // Everything else will be overwritten.
+    $old_values = parse_ini_file($filepath, TRUE);
+    $old_values = array('feEditing' => $old_values['feEditing']);
 
-      // Iterating through the form.
-      foreach ($arguments as $key => $data) {
-        if (is_array($data)) {
-          // We've got a mainkey.
-          $key = htmlspecialchars($key);
-          // Add it to the file.
-          $ini .= '[' . $key . ']' . PHP_EOL;
-          foreach ($data as $attribute => $value) {
+    // Iterating through the form.
+    foreach ($arguments as $section => $data) {
+      if (is_array($data) && in_array($section, $this->allowedSections)) {
+        // We've got a section key.
+        foreach ($data as $setting_name => $value) {
+          if (in_array($setting_name, $this->allowedSettingsNames)) {
+            // We escape the value, just in case, since we can not whitelist it.
             $value = htmlspecialchars(preg_replace('/\s+/', '', $value));
-            $attribute = htmlspecialchars($attribute);
             // Evaluate the setting!
-            $all_ok = \krexx\Config::evaluateSetting($value, $attribute);
-            if (!$all_ok) {
-              break;
+            if (\krexx\Config::evaluateSetting($section, $setting_name, $value)) {
+              $old_values[$section][$setting_name] = $value;
             }
-            $ini .= $attribute . '=' . '"' . $value . '"' . PHP_EOL;
+            else {
+              // Validation failed! kreXX will generate a message, which we will
+              // display at the buttom.
+              $all_ok = FALSE;
+            }
           }
-          if (!$all_ok) {
-            break;
+        }
+      }
+    }
+
+    // Now we must create the ini file.
+    $ini = '';
+    foreach ($old_values as $key => $setting) {
+      $ini .= '[' . $key . ']' . PHP_EOL;
+      foreach ($setting as $setting_name => $value) {
+        $ini .= $setting_name . ' = "' . $value . '"' . PHP_EOL;
+      }
+    }
+
+    // Now we should write the file!
+    if ($all_ok) {
+      $file = new Varien_Io_File();
+      if ($file->write($filepath, $ini) === FALSE) {
+        $all_ok = FALSE;
+        \krexx\Messages::addMessage('Configuration file ' . $filepath . ' is not writeable!');
+      }
+    }
+
+    // Something went wrong, we need to tell the user.
+    if (!$all_ok) {
+      Mage::getSingleton('core/session')->addError(strip_tags(\krexx\Messages::outputMessages()), "The settings were NOT saved.");
+    }
+    else {
+      Mage::getSingleton('core/session')->addSuccess("The settings were saved to: <br /> " . $filepath, "The data was saved.");
+    }
+
+    $this->_redirect('*/*/config');
+
+  }
+
+  /**
+   * Saves the fe editing config from the backendform.
+   */
+  public function savefeconfigAction() {
+    $arguments = $this->getRequest()->getPost();
+    $all_ok = TRUE;
+    $filepath = \Krexx\Config::getPathToIni();
+    // Whitelist of the vales we are accepting.
+    $allowed_values = array('full', 'display', 'none');
+
+    // Get the old values . . .
+    $old_values = parse_ini_file($filepath, TRUE);
+    // . . . and remove our part.
+    unset($old_values['feEditing']);
+
+    // Iterating through the form.
+    foreach ($arguments as $key => $data) {
+      if (is_array($data)) {
+        foreach ($data as $setting_name => $value) {
+          if (in_array($value, $allowed_values) && in_array($setting_name, $this->allowedSettingsNames)) {
+            // Whitelisted values are ok.
+            $old_values['feEditing'][$setting_name] = $value;
+          }
+          else {
+            // Validation failed!
+            $all_ok = FALSE;
+            \krexx\Messages::addMessage(htmlentities($value) . ' is not an allowed value!');
           }
         }
       }
-      // Now we should write the file!
-      if ($all_ok) {
-        // Ini already exists and is writeable.
-        $ini_is_ok = file_exists(\krexx\Config::getPathToIni()) && is_writeable(\krexx\Config::getPathToIni());
-        // Ini does not exist and directory is writeable.
-        $dir_is_ok = !file_exists(\krexx\Config::getPathToIni()) && is_writeable(KREXXDIR);
-        if ($ini_is_ok || $dir_is_ok) {
-          file_put_contents(\krexx\Config::getPathToIni(), $ini);
-        }
-        else {
-          $all_ok = FALSE;
-          \krexx\Messages::addMessage('Configuration file ' . \krexx\Config::getPathToIni() . ' is not writeable!');
-        }
-      }
-      // Something went wrong, we need to tell the user.
-      if (!$all_ok) {
-        Mage::getSingleton('core/session')->addError('The settings were NOT saved:' . \krexx\Messages::outputMessages());
-      }
-      else {
-        Mage::getSingleton('core/session')->addSuccess("The settings were saved to: <br /> " . \krexx\Config::getPathToIni());
-      }
+    }
 
-    $this->_redirect('*/*/edit');
+    // Now we must create the ini file.
+    $ini = '';
+    foreach ($old_values as $key => $setting) {
+      $ini .= '[' . $key . ']' . PHP_EOL;
+      foreach ($setting as $setting_name => $value) {
+        $ini .= $setting_name . ' = "' . $value . '"' . PHP_EOL;
+      }
+    }
 
+    // Now we should write the file!
+    if ($all_ok) {
+      $file = new Varien_Io_File();
+      if ($file->write($filepath, $ini) === FALSE) {
+        $all_ok = FALSE;
+        \krexx\Messages::addMessage('Configuration file ' . $filepath . ' is not writeable!');
+      }
+    }
 
+    // Something went wrong, we need to tell the user.
+    if (!$all_ok) {
+      Mage::getSingleton('core/session')->addError(strip_tags(\krexx\Messages::outputMessages()), "The settings were NOT saved.");
+    }
+    else {
+      Mage::getSingleton('core/session')->addSuccess("The settings were saved to: <br /> " . $filepath, "The data was saved.");
+    }
+
+    $this->_redirect('*/*/feconfig');
   }
 
 }

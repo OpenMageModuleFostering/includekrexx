@@ -4,7 +4,7 @@
 ; ------------------------------------------------------------------------------------------
 [render]
 ; Change the above value to set the CSS skin used to render kreXX layout.
-; skin = "schablon.com"
+; skin = "schablon"
 skin = "hans"
 
 ; The HTML header send by kreXX. 
@@ -17,6 +17,7 @@ doctype = "<!DOCTYPE html>"
 ; the bundled file, but you might want to use the one from your project, or none at all.
 jsLib = "jquery-1.11.0.js"
 ; jsLib = "/../../libraries/js/jQuery/jquery-1.11.0.js"
+
 
 ; ------------------------------------------------------------------------------------------
 [logging]
@@ -54,6 +55,7 @@ disabled = "false"
 ; If set to true, there will be no output when AJAX is detected, to prevent a js error.
 detectAjax = "true"
 ; detectAjax = "false"
+
 
 ; ------------------------------------------------------------------------------------------
 [deep]
@@ -107,3 +109,33 @@ registerAutomatically = "false"
 ; possible.
 backtraceAnalysis = "normal"
 ; backtraceAnalysis = "deep"
+
+; ------------------------------------------------------------------------------------------
+[feEditing]
+; Here you can edit the frontend configuration form
+; full    = can be edited
+; display = is displayed only
+; none    = is not displayed at all
+; Since the local configuration is stored in a cookie, settings will be 
+; ignored, in case a setting can not be edited.
+skin = "full"
+jsLib = "none"
+memoryLeft = "full"
+maxRuntime = "full"
+folder = "none"
+maxfiles = "none"
+destination = "full"
+useCookies = "none"
+maxCall = "full"
+disabled = "full"
+detectAjax = "full"
+analyseProtected = "full"
+analysePrivate = "full"
+analyseTraversable = "full"
+debugMethods = "display"
+level = "full"
+analysePublicMethods = "full"
+analyseProtectedMethods = "full"
+analysePrivateMethods = "full"
+registerAutomatically = "full"
+backtraceAnalysis = "full"

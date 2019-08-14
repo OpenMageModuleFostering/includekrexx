@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Empty magento backend block for kreXX
+ * Magento backend block for kreXX
  * kreXX: Krumo eXXtended
  *
  * This is a debugging tool, which displays structured information
@@ -16,11 +16,12 @@
  * @package Krexx
  */
 
-class Brainworxx_Includekrexx_Block_Adminhtml_Krexx extends Mage_Adminhtml_Block_Template {
+class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml_Block_Template {
 
 
   /**
-   * (non-PHPdoc)
+   * Assign the values to the template file.
+   *
    * @see Mage_Core_Block_Template::_construct()
    */
   public function _construct() {
@@ -30,8 +31,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Krexx extends Mage_Adminhtml_Block
     $settings = array();
     $factory = array();
 
-    // Initialzing help data for the template
-
+    // Initialzing help data for the template.
     $help['skin'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('skin')));
     $help['jsLib'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('jsLib')));
     $help['memoryLeft'] = htmlspecialchars(strip_tags(\Krexx\Help::getHelp('memoryLeft')));
@@ -112,9 +112,10 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Krexx extends Mage_Adminhtml_Block
    * Return save url for edit form
    *
    * @return string
+   *   The url where the form is saved.
    */
   public function getSaveUrl() {
-    return $this->getUrl('*/*/save', array('_current'=>true, 'back'=>null));
+    return $this->getUrl('*/*/saveconfig', array('_current' => TRUE, 'back' => NULL));
   }
 
 }

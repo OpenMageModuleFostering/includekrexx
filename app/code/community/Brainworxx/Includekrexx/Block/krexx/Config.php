@@ -73,7 +73,7 @@ class Config {
     ),
   );
 
-  protected static $feConfigFallback = array(
+  public static $feConfigFallback = array(
     'analysePublicMethods' => array(
       'type' => 'Select',
       'editable' => 'true',
@@ -115,8 +115,8 @@ class Config {
       'editable' => 'true',
     ),
     'useCookies' => array(
-      'type' => 'Select',
-      'editable' => 'true',
+      'type' => 'None',
+      'editable' => 'false',
     ),
     'destination' => array(
       'type' => 'Select',
@@ -200,9 +200,15 @@ class Config {
       return FALSE;
     }
 
+    // Check for ajax and cli.
+    if (Toolbox::isRequestAjaxOrCli()) {
+      return FALSE;
+    }
+
     // Are we using Debug cookies?
     if (Config::getConfigValue('output', 'useCookies', $ignore_local_settings) == 'true') {
-      if (isset($_COOKIE['KrexxDebug']) && $_COOKIE['KrexxDebug'] == 'yes') {
+      $krexx_debug = getConfigFromCookies('', 'KrexxDebug');
+      if (is_null($krexx_debug) && $krexx_debug == 'yes') {
         $debug_session = TRUE;
       }
       else {
@@ -280,10 +286,6 @@ class Config {
    *
    * @param array $new_settings
    *   Part of the array we want to overwrite.
-   *
-   * @todo In case of a fatal error handler, it is not probemlatical to simply
-   *   overwrite these values. Later on, we might want to restore the
-   *   old values.
    */
   public static function overwriteLocalSettings(array $new_settings) {
     self::krexxArrayMerge(self::$localConfig, $new_settings);
@@ -347,9 +349,7 @@ class Config {
 
     // Get Settings from the cookies. We do not valuate them,
     // so the dev can correct them, in case there are wrong values.
-    if (is_readable(self::$pathToIni)) {
-      $config_ini = (array) parse_ini_file(self::$pathToIni, TRUE);
-    }
+    $config_ini = (array) parse_ini_string(Toolbox::getFileContents(self::$pathToIni), TRUE);
 
     foreach (self::$configFallback as $section_name => $section_data) {
       foreach ($section_data as $parameter_name => $parameter_value) {
@@ -400,7 +400,7 @@ class Config {
    * to point kreXX to another directory for it's config.
    *
    * @return string
-   *   The path to the inifile
+   *   The path to the inifile.
    */
   public Static Function getPathToIni() {
     return self::$pathToIni;
@@ -423,9 +423,7 @@ class Config {
     // Not loaded?
     if (empty($_config)) {
       // File is somewhere else.
-      if (is_readable(KREXXDIR . 'KrexxConfig.ini')) {
-        $config_ini = (array) parse_ini_file(KREXXDIR . 'KrexxConfig.ini', TRUE);
-      }
+      $config_ini = (array) parse_ini_string(Toolbox::getFileContents(KREXXDIR . 'KrexxConfig.ini'), TRUE);
       if (isset($config_ini['pathtoini']['pathtoini'])) {
         self::$pathToIni = $config_ini['pathtoini']['pathtoini'];
       }
@@ -433,13 +431,11 @@ class Config {
         self::$pathToIni = KREXXDIR . 'Krexx.ini';
       }
 
-      if (is_readable(self::$pathToIni)) {
-        $_config = (array) @parse_ini_file(self::$pathToIni, TRUE);
-      }
+      $_config = (array) parse_ini_string(Toolbox::getFileContents(self::$pathToIni), TRUE);
     }
 
     // Do we have a value in the ini?
-    if (isset($_config[$group][$name]) && self::evaluateSetting($_config[$group][$name], $name)) {
+    if (isset($_config[$group][$name]) && self::evaluateSetting($group, $name, $_config[$group][$name])) {
       return $_config[$group][$name];
     }
   }
@@ -456,29 +452,29 @@ class Config {
    *   The value.
    */
   public static function getConfigFromCookies($group, $name) {
-    static $_config = array();
-
-    if (!isset($_COOKIE['KrexxDebugSettings'])) {
-      // No cookies, no result.
-      return;
-    }
+    static $config = array();
 
     // Not loaded?
-    if (empty($_config)) {
+    if (empty($config)) {
       // We have local settings.
-      $_config = json_decode($_COOKIE['KrexxDebugSettings'], TRUE);
+      if (isset($_COOKIE['KrexxDebugSettings'])) {
+        $setting = json_decode($_COOKIE['KrexxDebugSettings'], TRUE);
+      }
+      if (isset($setting) && is_array($setting)) {
+        $config = $setting;
+      }
     }
 
-    $param_config = self::getFrontendConfigConfiguration($name);
+    $param_config = self::getFeConfig($name);
     if ($param_config[0] === FALSE) {
       // We act as if we have not found the value. Configurations that are
       // not editable on the frontend will be ignored!
       return;
     }
     // Do we have a value in the cookies?
-    if (isset($_config[$name]) && self::evaluateSetting($_config[$name], $name)) {
+    if (isset($config[$name]) && self::evaluateSetting($group, $name, $config[$name])) {
       // We escape them, just in case.
-      $value = htmlspecialchars($_config[$name]);
+      $value = htmlspecialchars($config[$name]);
 
       return $value;
     }
@@ -487,16 +483,27 @@ class Config {
   /**
    * Evaluate a single setting from the cookies or the ini file.
    *
-   * @param mixed $value
-   *   The value to evaluate.
+   * @param string $group
+   *   The group value in the ini.
    * @param string $name
    *   The name of the setting.
+   * @param string $value
+   *   The value to evaluate.
    *
    * @return bool
    *   If it was evaluated.
    */
-  public static function evaluateSetting($value, $name) {
+  public static function evaluateSetting($group, $name, $value) {
     static $evaluated = array();
+
+    // We are not evaluating the group "feEditing". The values there
+    // need to be translated to kreXX readable settings. Each value in
+    // there is a name of a preset. When the name is not found, we
+    // translate this to the preset with the least privileges (no edit
+    // and no display).
+    if ($group == 'feEditing') {
+      return TRUE;
+    }
 
     if (!isset($evaluated[$name])) {
       // We must evaluate it.
@@ -633,11 +640,8 @@ class Config {
 
         case "jsLib":
           // We expect a path to a jquery library, or an empty value.
-          if (is_readable(KREXXDIR . 'jsLibs/' . $value)) {
-            // Check if this is jquery.
-            $file_contents = file_get_contents(KREXXDIR . 'jsLibs/' . $value);
-            $is_jquery = strpos($file_contents, 'jQuery Foundation, Inc.') !== FALSE;
-          }
+          $is_jquery = strpos(Toolbox::getFileContents(KREXXDIR . 'jsLibs/' . $value), 'jQuery Foundation, Inc.') !== FALSE;
+
           // We accept empty values and jquery libraries.
           if (empty($value) || $is_jquery) {
             $result = TRUE;
@@ -654,7 +658,7 @@ class Config {
 
         case "skin":
           // We check the directory and one of the files for readability.
-          if (is_dir(KREXXDIR . 'skins/' . $value) && is_readable(KREXXDIR . 'skins/' . $value . '/header.html')) {
+          if (is_readable(KREXXDIR . 'skins/' . $value . '/header.html')) {
             $result = TRUE;
           }
           if (!$result) {
@@ -737,6 +741,82 @@ class Config {
   }
 
   /**
+   * Get the config of the frontend config form from the file.
+   *
+   * @param string $parameter_name
+   *   The parameter you want to render.
+   *
+   * @return array
+   *   The configuration (is it editable, a dropdown, a textfield, ...)
+   */
+  public static function getFeConfigFromFile($parameter_name) {
+    static $config = array();
+
+    // Not loaded?
+    if (!isset($config[$parameter_name])) {
+      // Get the human readable stuff from the ini file.
+      $value = self::getConfigFromFile('feEditing', $parameter_name);
+      // Is it set?
+      if (!is_null($value)) {
+        // We need to translate it to a "real" setting.
+        // Get the html control name.
+        switch ($parameter_name) {
+          case 'jsLib':
+            $type = 'Input';
+            break;
+
+          case 'folder':
+            $type = 'Input';
+            break;
+
+          case 'maxfiles':
+            $type = 'Input';
+            break;
+
+          case 'useCookies':
+            $type = 'Select';
+            break;
+
+          default:
+            // Nothing special, we get our value from the config class.
+            $type = self::$feConfigFallback[$parameter_name]['type'];
+        }
+        // Stitch together the setting.
+        switch ($value) {
+          case 'none':
+            $type = 'None';
+            $editable = 'false';
+            break;
+
+          case 'display':
+            $editable = 'false';
+            break;
+
+          case 'full':
+            $editable = 'true';
+            break;
+
+          default:
+            // Unknown setting.
+            // Fallback to no display, just in case.
+            $type = 'None';
+            $editable = 'false';
+            break;
+        }
+        $result = array(
+          'type' => $type,
+          'editable' => $editable,
+        );
+        // Remember the setting.
+        $config[$parameter_name] = $result;
+      }
+    }
+    if (isset($config[$parameter_name])) {
+      return $config[$parameter_name];
+    }
+  }
+
+  /**
    * Get the configuration of the frontend config form.
    *
    * @param string $parameter_name
@@ -745,27 +825,18 @@ class Config {
    * @return array
    *   The configuration (is it editable, a dropdown, a textfield, ...)
    */
-  public static function getFrontendConfigConfiguration($parameter_name) {
+  public static function getFeConfig($parameter_name) {
     static $config = array();
 
-    // Not loaded?
-    if (empty($config)) {
-      // File is somewhere else.
-      if (is_readable(KREXXDIR . 'KrexxConfig.ini')) {
-        $config_ini = (array) parse_ini_file(KREXXDIR . 'KrexxConfig.ini', TRUE);
-      }
-      if (isset($config_ini['pathtoini']['pathtofeconfig'])) {
-        $path = $config_ini['pathtoini']['pathtoini'];
-      }
-      else {
-        $path = KREXXDIR . 'FeConfig.ini';
-      }
-      if (is_readable(KREXXDIR . 'FeConfig.ini')) {
-        $config = (array) parse_ini_file(KREXXDIR . 'FeConfig.ini', TRUE);
+    if (!isset($config[$parameter_name])) {
+      // Load it from the file.
+      $filevalue = self::getFeConfigFromFile($parameter_name);
+      if (!is_null($filevalue)) {
+        $config[$parameter_name] = $filevalue;
       }
     }
 
-    // Trying to get the value.
+    // Do we have a value?
     if (isset($config[$parameter_name])) {
       $type = $config[$parameter_name]['type'];
       $editable = $config[$parameter_name]['editable'];

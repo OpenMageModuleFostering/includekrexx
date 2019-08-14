@@ -165,20 +165,28 @@ class Variables {
    *
    * @param string $data
    *   The data which nees to be sanitized.
+   * @param bool $code
+   *   Do we need to format the string as code?
    *
-   * @return string
+   * @return string The encoded string.
    *   The encoded string.
    */
   public static function encodeString($data, $code = FALSE) {
+    $result = '';
     // Try to encode it.
-    $result = htmlentities($data);
-    // We are also encodeing { and }, because we need them for our
-    // chunks.
-    $result = str_replace('@', '&#64;', $result);
+    $encoding = mb_detect_encoding($data);
+    if (in_array($encoding, get_html_translation_table(HTML_ENTITIES))) {
+      set_error_handler(function() { /* do nothing. */ });
+      $result = @htmlentities($data, NULL, $encoding);
+      restore_error_handler();
+      // We are also encodeing @, because we need them for our
+      // chunks.
+      $result = str_replace('@', '&#64;', $result);
+    }
     // Check if encoding was successful.
     if (strlen($result) === 0 && strlen($data) !== 0) {
       // Something went wrong with the encoding, we need to
-      // completely encode this one to be able to display it properly!
+      // completely encode this one to be able to display it at all!
       $data = @mb_convert_encoding($data, 'UTF-32', mb_detect_encoding($data));
       $char_array = unpack("N*", $data);
 

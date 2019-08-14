@@ -53,7 +53,20 @@ class Messages {
    */
   public static function outputMessages() {
     // Simple Wrapper for Render::renderMessages
-    return Render::renderMessages(self::$messages);
+    if (php_sapi_name() == "cli") {
+      if (count(self::$messages)) {
+        $result = "\n\nkreXX messages\n";
+        $result .= "==============\n";
+        foreach (self::$messages as $message) {
+          $message = $message['message'];
+          $result .= "$message\n";
+        }
+        $result .= "\n\n";
+        return $result;
+      }
+    }
+    else {
+      return Render::renderMessages(self::$messages);
+    }
   }
-
 }

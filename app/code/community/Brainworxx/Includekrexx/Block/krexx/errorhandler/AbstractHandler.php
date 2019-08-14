@@ -1,4 +1,6 @@
 <?php
+namespace Krexx\Errorhandler;
+
 /**
  * @file
  * Abstract errorhandler for kreXX
@@ -15,9 +17,6 @@
  * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
  * @package Krexx
  */
-
-namespace Krexx\Errorhandler;
-
 abstract class AbstractHandler {
 
   /**

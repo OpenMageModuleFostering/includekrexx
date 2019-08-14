@@ -7,16 +7,21 @@
           <title>kreXX</title>
           <sort_order>15</sort_order>
           <children>
-            <editkrexx translate="title" module="includekrexx">
+            <edit translate="title" module="includekrexx">
               <title>Edit kreXX config</title>
               <sort_order>5</sort_order>
-              <action>adminhtml/krexx/edit</action>
-            </editkrexx>
-            <krexxdocu translate="title" module="includekrexx">
+              <action>adminhtml/krexx/config</action>
+            </edit>
+            <editfe translate="title" module="includekrexx">
+              <title>Administer FE editing</title>
+              <sort_order>10</sort_order>
+              <action>adminhtml/krexx/feconfig</action>
+            </editfe>
+            <docu translate="title" module="includekrexx">
               <title>kreXX quick docu</title>
               <sort_order>15</sort_order>
               <action>adminhtml/krexx/docu</action>
-            </krexxdocu>
+            </docu>
           </children>
         </krexx>
       </children>
@@ -31,12 +36,15 @@
               <krexx>
               <title>kreXX</title>
                 <children>
-                  <editkrexx>
-                    <title>Edit kreXX config</title>
-                  </editkrexx>
-                  <krexxdocu>
+                  <edit>
+                    <title>Edit kreXX Config</title>
+                  </edit>
+                  <editfe>
+                    <title>Administer kreXX FE Editing</title>
+                  </editfe>
+                  <docu>
                     <title>kreXX quick docu</title>
-                  </krexxdocu>
+                  </docu>
                 </children>
               </krexx>
             </children>

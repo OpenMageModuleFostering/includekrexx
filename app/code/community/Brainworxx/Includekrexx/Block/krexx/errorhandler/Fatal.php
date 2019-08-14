@@ -18,6 +18,10 @@
 
 namespace Krexx\Errorhandler;
 
+/**
+ * Class Fatal
+ * @package Krexx\Errorhandler
+ */
 class Fatal extends AbstractHandler {
 
   /**

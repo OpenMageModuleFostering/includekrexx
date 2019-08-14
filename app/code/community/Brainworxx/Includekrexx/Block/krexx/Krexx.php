@@ -16,6 +16,11 @@
  * @package Krexx
  */
 
+use Krexx\Toolbox;
+use Krexx\Internals;
+use Krexx\Config;
+use Krexx\Messages;
+
 /**
  * Alias function for object analysis.
  *
@@ -45,10 +50,6 @@ function krexx($data, $handle = '') {
  *
  * @package Krexx
  */
-use Krexx\Toolbox;
-use Krexx\Internals;
-use Krexx\Config;
-use Krexx\Messages;
 class Krexx {
 
   /**
@@ -57,8 +58,6 @@ class Krexx {
    * @var \Krexx\Errorhandler\Fatal
    */
   protected static $krexxFatal;
-
-  public static $shutdownHandler;
 
   /**
    * Stores wheather out fatal error handler should be active.
@@ -115,19 +114,16 @@ class Krexx {
 
     // Regsiter our shutdown handler. He will handle the display
     // of kreXX after the hosting CMS is finished.
-    self::$shutdownHandler = new \Krexx\ShutdownHandler();
-    register_shutdown_function(array(self::$shutdownHandler, 'shutdownCallback'));
+    Internals::$shutdownHandler = new \Krexx\ShutdownHandler();
+    register_shutdown_function(array(Internals::$shutdownHandler, 'shutdownCallback'));
 
     // Check if the log and chunk folder are writeable.
     // If not, give feedback!
-    $something_wrong = FALSE;
-    if (!is_writeable(KREXXDIR . 'chunks/')) {
-      \Krexx\Messages::addMessage('Chunksfolder ' . KREXXDIR . 'chunks/' . ' is not writeable!', 'critical');
-      $something_wrong = TRUE;
+    if (!is_writeable(KREXXDIR . 'chunks' . DIRECTORY_SEPARATOR)) {
+      \Krexx\Messages::addMessage('Chunksfolder ' . KREXXDIR . 'chunks' . DIRECTORY_SEPARATOR . ' is not writeable!', 'critical');
     }
-    if (!is_writeable(KREXXDIR . 'log/')) {
-      \Krexx\Messages::addMessage('Logfolder ' . KREXXDIR . 'log/' . ' is not writeable !', 'critical');
-      $something_wrong = TRUE;
+    if (!is_writeable(KREXXDIR . 'log' . DIRECTORY_SEPARATOR)) {
+      \Krexx\Messages::addMessage('Logfolder ' . KREXXDIR . 'log' . DIRECTORY_SEPARATOR . ' is not writeable !', 'critical');
     }
     // At this point, we won't inform the user right away. The error message
     // will pop up, when kreXX is actually displayed, no need to bother the
@@ -194,7 +190,7 @@ class Krexx {
     // Reset what we had before.
     self::$timekeeping = array();
     self::$counterCache = array();
-    self::$timekeeping[] = $_SERVER['REQUEST_URI'];
+    self::$timekeeping[] = Toolbox::getCurrentUrl();
 
     self::timerMoment('start');
     self::reFatalAfterKrexx();
@@ -310,19 +306,14 @@ class Krexx {
     Internals::$timer = time();
 
     // Find caller.
-    $backtrace = debug_backtrace();
-    while ($caller = array_pop($backtrace)) {
-      if (strtolower(@$caller['function']) == 'krexx' || strtolower(@$caller['class']) == 'krexx') {
-        break;
-      }
-    }
+    $caller = Internals::findCaller();
 
     // Render it.
     Krexx\Render::$KrexxCount++;
     $footer = Toolbox::outputFooter($caller, TRUE);
-    \Krexx::$shutdownHandler->addChunkString(Toolbox::outputHeader('Edit local settings', TRUE), TRUE);
-    \Krexx::$shutdownHandler->addChunkString(Messages::outputMessages(), TRUE);
-    \Krexx::$shutdownHandler->addChunkString($footer, TRUE);
+    Internals::$shutdownHandler->addChunkString(Toolbox::outputHeader('Edit local settings', TRUE), TRUE);
+    Internals::$shutdownHandler->addChunkString(Messages::outputMessages(), TRUE);
+    Internals::$shutdownHandler->addChunkString($footer, TRUE);
 
     // Cleanup the hive.
     \Krexx\Hive::cleanupHive();

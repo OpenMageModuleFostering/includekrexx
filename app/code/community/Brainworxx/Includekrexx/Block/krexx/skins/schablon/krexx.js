@@ -232,21 +232,7 @@
    *   The Element you want to expand.
    */
   krexx.toggle = function (el) {
-    var ul = el.parentNode.getElementsByTagName('ul');
-    var i;
-    for (i = 0; i < ul.length; i++) {
-      if (ul[i].parentNode.parentNode === el.parentNode) {
-        ul[i].parentNode.style.display = (ul[i].parentNode.style.display == 'none') ? 'block' : 'none';
-      }
-    }
-
-    // Toggle the class.
-    if (ul[0].parentNode.style.display === 'block') {
-      krexx.reclass(el, 'Krexx-opened');
-    }
-    else {
-      krexx.unclass(el, 'Krexx-opened');
-    }
+    $krexxQuery(el).toggleClass('kopened').next().toggleClass('khidden');
   };
 
   /**
@@ -313,7 +299,7 @@
       var c = cookieArray[i];
       while (c.charAt(0) === ' ') {
         c = c.substring(1, c.length);
-      };
+      }
       if (c.indexOf(cookieName) === 0) {
         try {
           // Return json, if possible.

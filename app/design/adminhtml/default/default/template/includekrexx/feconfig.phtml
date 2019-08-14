@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Adminhtml help template for kreXX
+ * Adminhtml configuration template for kreXX
  * kreXX: Krumo eXXtended
  *
  * This is a debugging tool, which displays structured information
@@ -18,19 +18,35 @@
 
 /* @var Brainworxx_Includekrexx_Block_Adminhtml_Krexx $this */
 ?>
-<h1>Edit kreXX Configuration File</h1>
+
+<h1>Administer kreXX FE Editing</h1>
 <form action="<?php echo $this->getSaveUrl() ?>" method="post" id="editconfig" >
-  <table cellpadding="0" cellspacing="2" border="0" class="krexx-config form-list">
+  <table border="0" class="krexx-config">
     <tr>
-      <th colspan="4"><b>Render</b></th>
+      <th colspan="3"><b>Here you can edit the frontend configuration form.</b></th>
     </tr>
     <tr>
-      <td class=""><label for="skin">Skin</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['skin']; ?>"></div></td>
-      <td class="">
+      <td>full edit</td>
+      <td colspan="2"> = The value can be edited in the frontend.</td>
+    </tr>
+    <tr>
+      <td>display</td>
+      <td colspan="2"> = The value will only be displayed.</td>
+    </tr>
+    <tr>
+      <td>do not display</td>
+      <td colspan="2"> = kreXX will not display the value.</td>
+    </tr>
+    <tr><td colspan="3">&nbsp;</td></tr>
+    <tr>
+      <th colspan="3"><b>Render</b></th>
+    </tr>
+    <tr>
+      <td><label for="skin">Skin</label></td>
+      <td>
         <select name="render[skin]" id="skin">
-          <?php foreach($skins as $key => $value) {
-                if ($value == $settings['render']['skin']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['render']['skin']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -41,107 +57,151 @@
           <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.skin" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['skin']; ?>/>
         <label for="factory.skin">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="jsLib">Path to jQuery</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['jsLib']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['render']['jsLib']; ?>" name="render[jsLib]" id="jsLib">
+      <td><label for="jsLib">Path to jQuery</label></td>
+      <td>
+        <select name="render[jsLib]" id="jsLib">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['render']['jsLib']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.jsLib" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['jsLib']; ?>/>
         <label for="factory.jsLib">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['memoryLeft']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['render']['memoryLeft']; ?>" name="render[memoryLeft]" id="memoryLeft">
+      <td><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
+      <td>
+        <select name="render[memoryLeft]" id="memoryLeft">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['render']['memoryLeft']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.memoryLeft" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['memoryLeft']; ?>/>
         <label for="factory.memoryLeft">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="maxRuntime">Maximum Runtime [Seconds]</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['maxRuntime']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['render']['maxRuntime']; ?>" name="render[maxRuntime]" id="maxRuntime">
+      <td><label for="maxRuntime">Maximum Runtime [Seconds]</label></td>
+      <td>
+        <select name="render[maxRuntime]" id="maxRuntime">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['render']['maxRuntime']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.maxRuntime" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['maxRuntime']; ?>/>
         <label for="factory.maxRuntime">Use factory settings</label>
       </td>
     </tr>
-    <tr><td colspan="4">&nbsp;</td></tr>
-
-
+    <tr><td colspan="3">&nbsp;</td></tr>
     <tr>
-      <th colspan="4"><b>Logging</b></th>
+      <th colspan="3"><b>Logging</b></th>
     </tr>
     <tr>
-      <td class=""><label for="folder">Folder:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['folder']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['logging']['folder']; ?>" name="logging[folder]" id="folder">
+      <td><label for="folder">Folder:</label></td>
+      <td>
+        <select name="logging[folder]" id="folder">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['logging']['folder']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.folder" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['folder']; ?>/>
         <label for="factory.folder">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="maxfiles">Maximum files in the logfolder:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['maxfiles']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['logging']['maxfiles']; ?>" name="logging[maxfiles]" id="maxfiles">
+      <td><label for="maxfiles">Maximum files in the logfolder:</label></td>
+      <td>
+        <select name="logging[maxfiles]" id="maxfiles">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['logging']['maxfiles']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.maxfiles" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['maxfiles']; ?>/>
         <label for="factory.maxfiles">Use factory settings</label>
       </td>
     </tr>
-    <tr><td colspan="4">&nbsp;</td></tr>
-
-
+    <tr><td colspan="3">&nbsp;</td></tr>
     <tr>
-      <th colspan="4"><b>Output</b></th>
+      <th colspan="3"><b>Output</b></th>
     </tr>
     <tr>
-      <td class=""><label for="destination">Destination:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['destination']; ?>"></div></td>
-      <td class="">
+      <td><label for="destination">Destination:</label></td>
+      <td>
         <select name="output[destination]" id="destination">
-          <?php foreach($this->getSelectDestination() as $key => $value) {
-            if ($value == $settings['output']['destination']) {
-              $selected = 'selected="selected"';
-            }
-            else {
-              $selected = '';
-            }
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['output']['destination']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.destination" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['destination']; ?>/>
         <label for="factory.destination">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="useCookies">Use debug cookies:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['useCookies']; ?>"></div></td>
-      <td class="">
+      <td><label for="useCookies">Use debug cookies:</label></td>
+      <td>
         <select name="output[useCookies]" id="useCookies">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['output']['useCookies']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['output']['useCookies']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -149,54 +209,62 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.useCookies" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['useCookies']; ?>/>
         <label for="factory.useCookies">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="maxCall">Maximum amount of calls:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['maxCall']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['output']['maxCall']; ?>" name="output[maxCall]" id="maxCall">
+      <td><label for="maxCall">Maximum amount of calls:</label></td>
+      <td>
+        <select name="output[maxCall]" id="maxCall">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['output']['maxCall']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.maxCall" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['maxCall']; ?>/>
         <label for="factory.maxCall">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="disabled">Disable output:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['disabled']; ?>"></div></td>
-      <td class="">
+      <td><label for="disabled">Disable output:</label></td>
+      <td>
         <select name="output[disabled]" id="disabled">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['output']['disabled']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['output']['disabled']) {
                   $selected = 'selected="selected"';
                 }
                 else {
                   $selected = '';
                 }
           ?>
-          <option value="<?php echo $key; ?>" <?php echo $selected; ?>><?php echo $value; ?></option>
-          <?php } ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.disabled" class="checkbox" type="checkbox" value="1" name="factory"  <?php echo $factory['disabled']; ?>/>
         <label for="factory.disabled">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="detectAjax">Try to detect AJAX requests:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['detectAjax']; ?>"></div></td>
-      <td class="">
+      <td><label for="detectAjax">Try to detect AJAX requests:</label></td>
+      <td>
         <select name="output[detectAjax]" id="detectAjax">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['output']['detectAjax']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['output']['detectAjax']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -204,27 +272,24 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.detectAjax" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['detectAjax']; ?>/>
         <label for="factory.detectAjax">Use factory settings</label>
       </td>
     </tr>
-    <tr><td colspan="4">&nbsp;</td></tr>
-
-
+    <tr><td colspan="3">&nbsp;</td></tr>
     <tr>
-      <th colspan="4"><b>Deep</b></th>
+      <th colspan="3"><b>Deep</b></th>
     </tr>
     <tr>
-      <td class=""><label for="analyseProtected">Analyse protected properties:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analyseProtected']; ?>"></div></td>
-      <td class="">
+      <td><label for="analyseProtected">Analyse protected properties:</label></td>
+      <td>
         <select name="deep[analyseProtected]" id="analyseProtected">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['deep']['analyseProtected']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['deep']['analyseProtected']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -232,21 +297,20 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.analyseProtected" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseProtected']; ?>/>
         <label for="factory.analyseProtected">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="analysePrivate">Analyse private properties:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analysePrivate']; ?>"></div></td>
-      <td class="">
+      <td><label for="analysePrivate">Analyse private properties:</label></td>
+      <td>
         <select name="deep[analysePrivate]" id="analysePrivate">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['deep']['analysePrivate']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['deep']['analysePrivate']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -254,21 +318,20 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.analysePrivate" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analysePrivate']; ?>/>
         <label for="factory.analysePrivate">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="analyseTraversable">Analyse traversable data:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analyseTraversable']; ?>"></div></td>
-      <td class="">
+      <td><label for="analyseTraversable">Analyse traversable data:</label></td>
+      <td>
         <select name="deep[analyseTraversable]" id="analyseTraversable">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['deep']['analyseTraversable']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['deep']['analyseTraversable']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -276,49 +339,41 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.analyseTraversable" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseTraversable']; ?>/>
         <label for="factory.analyseTraversable">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="debugMethods">List of debug methods to poll for data:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['debugMethods']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['deep']['debugMethods']; ?>" name="deep[debugMethods]" id="debugMethods">
+      <td><label for="debugMethods">List of debug methods to poll for data:</label></td>
+      <td>
+        <select name="deep[debugMethods]" id="debugMethods">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['deep']['debugMethods']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.debugMethods" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['debugMethods']; ?>/>
         <label for="factory.debugMethods">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="level">Maximum nesting level for objects:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['level']; ?>"></div></td>
-      <td class="">
-        <input type="text" value="<?php echo $settings['deep']['level']; ?>" name="deep[level]" id="level">
-      </td>
-      <td class="">
-        <input id="factory.level" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['level']; ?>/>
-        <label for="factory.level">Use factory settings</label>
-      </td>
-    </tr>
-    <tr><td colspan="4">&nbsp;</td></tr>
-
-
-    <tr>
-      <th colspan="4"><b>Methods</b></th>
-    </tr>
-    <tr>
-      <td class=""><label for="analysePublicMethods">Analyse public methods:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analysePublicMethods']; ?>"></div></td>
-      <td class="">
-         <select name="methods[analysePublicMethods]" id="analysePublicMethods">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['methods']['analysePublicMethods']) {
+      <td><label for="level">Maximum nesting level:</label></td>
+      <td>
+        <select name="deep[level]" id="level">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['deep']['level']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -326,21 +381,45 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
+        <input id="factory.level" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['level']; ?>/>
+        <label for="factory.level">Use factory settings</label>
+      </td>
+    </tr>
+    <tr><td colspan="3">&nbsp;</td></tr>
+    <tr>
+      <th colspan="3"><b>Methods</b></th>
+    </tr>
+    <tr>
+      <td><label for="analysePublicMethods">Analyse public methods:</label></td>
+      <td>
+        <select name="methods[analysePublicMethods]" id="analysePublicMethods">
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['methods']['analysePublicMethods']) {
+                  $selected = 'selected="selected"';
+                }
+                else {
+                  $selected = '';
+                }
+          ?>
+          <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+          <?php }?>
+        </select>
+      </td>
+      <td>
         <input id="factory.analysePublicMethods" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analysePublicMethods']; ?>/>
         <label for="factory.analysePublicMethods">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="analyseProtectedMethods">Analyse protected methods:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analyseProtectedMethods']; ?>"></div></td>
-      <td class="">
+      <td><label for="analyseProtectedMethods">Analyse protected methods:</label></td>
+      <td>
         <select name="methods[analyseProtectedMethods]" id="analyseProtectedMethods">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['methods']['analyseProtectedMethods']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['methods']['analyseProtectedMethods']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -348,21 +427,20 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.analyseProtectedMethods" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseProtectedMethods']; ?>/>
         <label for="factory.analyseProtectedMethods">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="analysePrivateMethods">Analyse private methods:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analysePrivateMethods']; ?>"></div></td>
-      <td class="">
+      <td><label for="analysePrivateMethods">Analyse private methods:</label></td>
+      <td>
         <select name="methods[analysePrivateMethods]" id="analysePrivateMethods">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['methods']['analysePrivateMethods']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['methods']['analysePrivateMethods']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -370,27 +448,24 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.analysePrivateMethods" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analysePrivateMethods']; ?>/>
         <label for="factory.analysePrivateMethods">Use factory settings</label>
       </td>
     </tr>
-    <tr><td colspan="4">&nbsp;</td></tr>
-
-
+    <tr><td colspan="3">&nbsp;</td></tr>
     <tr>
-      <th colspan="4"><b>Error Handling</b></th>
+      <th colspan="3"><b>Error Handling and Backtrace</b></th>
     </tr>
     <tr>
-      <td class=""><label for="registerAutomatically">Register fatel error handler automatically:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['registerAutomatically']; ?>"></div></td>
-      <td class="">
+      <td><label for="registerAutomatically">Register fatal error handler automatically:</label></td>
+      <td>
         <select name="errorHandling[registerAutomatically]" id="registerAutomatically">
-          <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['errorHandling']['registerAutomatically']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['errorHandling']['registerAutomatically']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -398,21 +473,20 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.registerAutomatically" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['registerAutomatically']; ?>/>
         <label for="factory.registerAutomatically">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="backtraceAnalysis">Backtrace analysis settings:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['backtraceAnalysis']; ?>"></div></td>
-      <td class="">
+      <td><label for="backtraceAnalysis">Backtrace analysis settings:</label></td>
+      <td>
         <select name="errorHandling[backtraceAnalysis]" id="backtraceAnalysis">
-          <?php foreach($this->getSelectBacktrace() as $key => $value) {
-                if ($value == $settings['errorHandling']['backtraceAnalysis']) {
+          <?php foreach($data['settings'] as $key => $value) {
+                if ($key == $settings['errorHandling']['backtraceAnalysis']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -420,15 +494,16 @@
                 }
           ?>
           <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-          <?php } ?>
+          <?php }?>
         </select>
       </td>
-      <td class="">
+      <td>
         <input id="factory.backtraceAnalysis" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['backtraceAnalysis']; ?>/>
         <label for="factory.backtraceAnalysis">Use factory settings</label>
       </td>
     </tr>
   </table>
+  <br/>
   <?php echo $this->getBlockHtml('formkey')?>
   <input type="submit" value="Save configuration">
 </form>

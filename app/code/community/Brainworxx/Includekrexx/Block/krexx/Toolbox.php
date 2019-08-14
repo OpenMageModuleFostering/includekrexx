@@ -26,38 +26,6 @@ namespace Krexx;
 class Toolbox {
 
   /**
-   * Writes the output of kreXX to a file and cleans up the output folder.
-   *
-   * @param string $output
-   *   The generated markup, which will be written to a file.
-   */
-  public static function saveOutputToFile($output) {
-    static $log_dir;
-    if (is_null($log_dir)) {
-      $log_dir = Config::getConfigValue('logging', 'folder') . DIRECTORY_SEPARATOR;
-    }
-
-    $log_list = glob(KREXXDIR . $log_dir . "*.Krexx.html");
-    array_multisort(array_map('filemtime', $log_list), SORT_DESC, $log_list);
-    $max_file_count = (int) Config::getConfigValue('logging', 'maxfiles');
-    $count = 1;
-    // Cleanup logfiles.
-    foreach ($log_list as $file) {
-      if (is_file($file) && $count >= $max_file_count) {
-        unlink($file);
-      }
-      $count++;
-    }
-
-    $timestamp = self::fileStamp();
-    // Now we need to write this into a file.
-    $filename = KREXXDIR . $log_dir . DIRECTORY_SEPARATOR . $timestamp . '.Krexx.html';
-    Chunks::saveDechunkedToFile($filename, $output);
-    // include_once $filename;
-    // file_put_contents($filename, $output, FILE_APPEND);
-  }
-
-  /**
    * Returns the microtime timestamp for fileoperations.
    *
    * Fileoperations are the logfiles and the chunck handling.
@@ -76,48 +44,23 @@ class Toolbox {
   }
 
   /**
-   * Sends the output to the browser.
-   *
-   * The mainproblem here is:
-   * When the request comes via ajax, there is a good
-   * chance that we are outputting a json or xml. Sending
-   * kreXX via echo will destroy them
-   *
-   * @param string $output
-   *   The generated markup, which will be send to the browser.
-   */
-  public static function sendOutputToBrowser($output) {
-    // Check, if we are dealing with an ajax request.
-    if (self::isRequestAjax()) {
-      // We are facing an AJAX request.
-      // We will not interfere here.
-      // @todo Give feedback that we have new logfiles.
-      // @todo self::saveOutputToFile($output);
-      // It's not a good idea to create a file without explicite
-      // permission from the developer.
-      // Do nothing.
-    }
-    else {
-      Chunks::sendDechunkedToBrowser($output);
-    }
-  }
-
-  /**
    * Outputs a string, either to the browser or file.
    *
    * Wrapper for sendOutputToBrowser() and saveOutputToFile()
    *
    * @param string $string
    *   The generated DOM so far, for the output.
+   * @param bool $ignore_local_settings
+   *   Are we ignoring local settings?
    */
   public static function outputNow($string, $ignore_local_settings = FALSE) {
     if (Config::getConfigValue('output', 'destination', $ignore_local_settings) == 'file') {
       // Save it to a file.
-      Toolbox::saveOutputToFile($string);
+      Chunks::saveDechunkedToFile($string);
     }
     else {
       // Send it to the browser.
-      Toolbox::sendOutputToBrowser($string);
+      Chunks::sendDechunkedToBrowser($string);
     }
   }
 
@@ -128,20 +71,28 @@ class Toolbox {
    * @return bool
    *   TRUE when this is AJAX, FALSE if not
    */
-  public static function isRequestAjax() {
-    static $result;
+  public static function isRequestAjaxOrCli() {
+    $result = FALSE;
 
-    if (is_null($result)) {
-      if (Config::getConfigValue('output', 'detectAjax') == 'false') {
-        // We are not suppost to cae about ajax, so we return always a FALSE.
-        $result = FALSE;
+    if (Config::getConfigValue('output', 'destination') != 'file') {
+      // When we are not going to create a logfile, we send it to the browser.
+      // Check for ajax.
+      if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        // Appending stuff after a ajax request will most likely
+        // cause a js error. But there are moments when you actually
+        // want to do this.
+        if (Config::getConfigValue('output', 'detectAjax') == 'true') {
+          // We where suppost to detect ajax, and we did it right now.
+          return TRUE;
+        }
       }
-      else {
-        $result = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+      // Check for CLI.
+      if (php_sapi_name() == "cli") {
+        return TRUE;
       }
     }
-
-    return $result;
+    // Still here? This means it's neither.
+    return FALSE;
   }
 
   /**
@@ -211,7 +162,7 @@ class Toolbox {
           foreach ($section_data as $parameter_name => $parameter_value) {
             // Render the single value.
             // We need to find out where the value comes from.
-            $config = Config::getFrontendConfigConfiguration($parameter_name);
+            $config = Config::getFeConfig($parameter_name);
             $editable = $config[0];
             $type = $config[1];
 
@@ -272,24 +223,18 @@ class Toolbox {
       return '';
     }
     // Get the css file.
-    $_ = KREXXDIR . 'skins/' . Render::$skin . '/skin.css';
-    $css = file_get_contents($_);
+    $css = self::getFileContents(KREXXDIR . 'skins/' . Render::$skin . '/skin.css');
     // Remove whitespace.
     $css = preg_replace('/\s+/', ' ', $css);
 
-    $js = '';
-    // Adding JQuery.
-    $js_lib = KREXXDIR . 'jsLibs/' . Config::getConfigValue('render', 'jsLib');
-    if (file_exists($js_lib)) {
-      // We are not going to minimize the 3'rd party library.
-      $js .= implode(file($js_lib));
-    }
 
+    // Adding JQuery.
+    $js_lib = self::getFileContents(KREXXDIR . 'jsLibs/' . Config::getConfigValue('render', 'jsLib'));
+    $js_wrapper = self::getFileContents(KREXXDIR . 'jsLibs/wrapper.js');
+    $js = str_replace('{jQueryGoesHere}', $js_lib, $js_wrapper);
     // Krexx.js is comes directly form the template.
-    $template_js = KREXXDIR . 'skins/' . Render::$skin . '/krexx.js';
-    if (file_exists($template_js)) {
-      $js .= implode(file($template_js));
-    }
+    $js .= self::getFileContents(KREXXDIR . 'skins/' . Render::$skin . '/krexx.js');
+
     $been_here = TRUE;
     return Render::renderCssJs($css, $js);
   }
@@ -343,7 +288,7 @@ class Toolbox {
    */
   public static function isFolderProtected($path) {
     $result = FALSE;
-    if (file_exists($path . '/.htaccess')) {
+    if (is_readable($path . '/.htaccess')) {
       $content = file($path . '/.htaccess');
       foreach ($content as $line) {
         // We have what we are looking for, a
@@ -501,5 +446,81 @@ class Toolbox {
     }
 
     return $output;
+  }
+
+  /**
+   * Reads the content of a file.
+   *
+   * @param string $path
+   *   The path to the file.
+   *
+   * @return string
+   *   The content of the file, if readable.
+   */
+  public static function getFileContents($path) {
+    $result = '';
+
+    // Is it readable and does it have any content?
+    if (is_readable($path)) {
+      $size = filesize($path);
+      if ($size > 0) {
+        $file = fopen($path, "r");
+        $result = fread($file, $size);
+        fclose($file);
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * Return the current URL.
+   *
+   * @see http://stackoverflow.com/questions/6768793/get-the-full-url-in-php
+   * @author Timo Huovinen
+   *
+   * @return string
+   *   The current URL.
+   */
+  public static function getCurrentUrl() {
+    static $result;
+
+    if (!isset($result)) {
+      $s = $_SERVER;
+
+      // SSL or no SSL.
+      if (!empty($s['HTTPS']) && $s['HTTPS'] == 'on') {
+        $ssl = TRUE;
+      }
+      else {
+        $ssl = FALSE;
+      }
+      $sp = strtolower($s['SERVER_PROTOCOL']);
+      $protocol = substr($sp, 0, strpos($sp, '/'));
+      if ($ssl) {
+        $protocol .= 's';
+      }
+
+      $port = $s['SERVER_PORT'];
+
+      if ((!$ssl && $port == '80') || ($ssl && $port == '443')) {
+        // Normal combo with port and protokol.
+        $port = '';
+      }
+      else {
+        // We have a special port here.
+        $port = ':' . $port;
+      }
+
+      if (isset($s['HTTP_HOST'])) {
+        $host = $s['HTTP_HOST'];
+      }
+      else {
+        $host = $s['SERVER_NAME'] . $port;
+      }
+
+      $result = htmlspecialchars($protocol . '://' . $host . $s['REQUEST_URI'], ENT_QUOTES, 'UTF-8');
+    }
+    return $result;
   }
 }

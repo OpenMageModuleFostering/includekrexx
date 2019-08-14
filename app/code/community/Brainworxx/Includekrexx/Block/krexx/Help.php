@@ -27,7 +27,6 @@ class Help {
 
   // A simpe array to hold the values.
   // There should not be any string collusions.
-  // @todo Do we need some multilanguage options here ?
   protected static $helpArray = array(
     'localFunction' => 'Here you can enter your own alias function for \krexx::open().<br/> Example: When you enter \'gue\', the function will be \krexx::gue($myObject); [or krexx($myObject, \'gue\');],<br/> which only devs can use who have set the same value.This is useful, to prevent other devs from calling your debug functions.',
     'analyseProtected' => 'Shall kreXX try to analyse the protected properties of a class?<br/> This may result in a lot of output.',
@@ -42,7 +41,7 @@ class Help {
     'disabled' => 'Here you can disable kreXX. Note that this is just a local setting, it does not affect other browsers.',
     'folder' => 'This is the folder where kreXX will store it\'s logfiles.',
     'maxfiles' => 'How many logfiles do you want to store inside your logging folder?<br/> When there are more files than this number, the older files will get deleted.',
-    'skin' => 'Choose a skin here. We have provided kreXX with two skins: "schablon.com" and "hans".',
+    'skin' => 'Choose a skin here. We have provided kreXX with two skins: "schablon" and "hans".',
     'jsLib' => 'kreXX uses in the frontend jQuery. We have bundled it with jQuery 1.11.0, but it may interfere<br/> with the library that you use. To use your own libs, you can point kreXX to your jQuery file.<br /> Entering an empty value will prevent kreXX from loading any library.',
     'currentSettings' => 'kreXX\'s configuration can be edited here, changes will be stored in a cookie and overwrite the ini and factory settings.<br/> <strong>Please note, that these are only local settings. They only affect this browser.</strong>',
     'debugcookie' => 'Here you can toggle your debug cookie. This only works with the "useCookies" function above.',

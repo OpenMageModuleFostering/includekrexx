@@ -51,8 +51,6 @@ class Hive {
    * Adds a variable to the hive of arrays and objects which
    * are tracked for whether they have recursive entries.
    *
-   * @todo The saving of the whole array is an absolute memory hog!
-   *
    * @param mixed $bee
    *   Either array or object.
    *
@@ -77,9 +75,8 @@ class Hive {
       }
       else {
         // This should be an array.
-        // We are only tracking byRef arrays, so we need to check this.
-        // The only byRef array is , afaik $GLOBALS, but there might be
-        // others.
+        // We are only tracking the $GLOBALS arrays, so we need to check this.
+        // Other array recursions are handled by the nesting level.
         $recursion_marker = self::getMarker();
         if (!isset($bee[$recursion_marker])) {
           $clean_copy = $bee;

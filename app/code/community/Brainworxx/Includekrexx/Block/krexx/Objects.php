@@ -33,8 +33,6 @@ class Objects {
    * @param string $name
    *   The name of the object.
    *
-   * @todo refactor this method, it's too big
-   *
    * @return string
    *   The generated markup.
    */
@@ -58,63 +56,56 @@ class Objects {
     // Remember, that we've been here before.
     Hive::addToHive($data);
 
-    // Analyse it only, if we are below a certain level.
-    if ($level <= (int) Config::getConfigValue('deep', 'level')) {
-      $anon_function = function (&$parameter) {
-        $data = $parameter[0];
-        $name = $parameter[1];
-        $output = '';
+    $anon_function = function (&$parameter) {
+      $data = $parameter[0];
+      $name = $parameter[1];
+      $output = '';
 
-        // Dumping all Properties
-        // But only if we have any.
-        if (count(get_object_vars($data))) {
-          $parameter = array($data);
-          $anon_function = function (&$parameter) {
-            $data = $parameter[0];
-            // Standard dump of the vars.
-            return Internals::interateThrough($data);
-          };
-          $output .= Render::renderExpandableChild($name, 'class internals', $anon_function, $parameter, 'Public properties');
+      // Dumping all Properties
+      // But only if we have any.
+      if (count(get_object_vars($data))) {
+        $parameter = array($data);
+        $anon_function = function (&$parameter) {
+          $data = $parameter[0];
+          // Standard dump of the vars.
+          return Internals::interateThrough($data);
+        };
+        $output .= Render::renderExpandableChild($name, 'class internals', $anon_function, $parameter, 'Public properties');
+      }
+
+      // Dumping all protected properties.
+      if (Config::getConfigValue('deep', 'analyseProtected') == 'true') {
+        $ref = new \ReflectionClass($data);
+        $ref_props = $ref->getProperties(\ReflectionProperty::IS_PROTECTED);
+        if (count($ref_props)) {
+          $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Protected properties');
         }
+      }
 
-        // Dumping all protected properties.
-        if (Config::getConfigValue('deep', 'analyseProtected') == 'true') {
-          $ref = new \ReflectionClass($data);
-          $ref_props = $ref->getProperties(\ReflectionProperty::IS_PROTECTED);
-          if (count($ref_props)) {
-            $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Protected properties');
-          }
+      // Dumping all private properties.
+      if (Config::getConfigValue('deep', 'analysePrivate') == 'true') {
+        $ref = new \ReflectionClass($data);
+        $ref_props = $ref->getProperties(\ReflectionProperty::IS_PRIVATE);
+        if (count($ref_props)) {
+          $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Private properties');
         }
+      }
 
-        // Dumping all private properties.
-        if (Config::getConfigValue('deep', 'analysePrivate') == 'true') {
-          $ref = new \ReflectionClass($data);
-          $ref_props = $ref->getProperties(\ReflectionProperty::IS_PRIVATE);
-          if (count($ref_props)) {
-            $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Private properties');
-          }
-        }
+      // Dumping all methods
+      // but only if we have any.
+      $output .= Objects::getMethodData($data, $name);
 
-        // Dumping all methods
-        // but only if we have any.
-        $output .= Objects::getMethodData($data, $name);
+      // Dumping traversable data.
+      if (Config::getConfigValue('deep', 'analyseTraversable') == 'true') {
+        $output .= Objects::getTraversableData($data, $name);
+      }
 
-        // Dumping traversable data.
-        if (Config::getConfigValue('deep', 'analyseTraversable') == 'true') {
-          $output .= Objects::getTraversableData($data, $name);
-        }
+      // Dumping all configured debug functions.
+      $output .= Objects::pollAllConfiguredDebugMethods($data, $name);
+      return $output;
+    };
 
-        // Dumping all configured debug functions.
-        $output .= Objects::pollAllConfiguredDebugMethods($data, $name);
-        return $output;
-      };
-    }
-    else {
-      // We will not go into the object pyramide any further.
-      $anon_function = function () {
-        return Variables::analyseString("Maxlevel for object analysis reached. I will not go any further.\n To increase this value, please edit the ini file.", 'Feedback');
-      };
-    }
+
     // Output data from the class.
     $output .= Render::renderExpandableChild($name, 'class', $anon_function, $parameter, get_class($data), Toolbox::generateDomIdFromObject($data));
     // We've finished this one, and can decrease the levelsetting.
@@ -262,7 +253,7 @@ class Objects {
           set_error_handler(function() {
             // Do nothing.
           });
-          $parameter = call_user_func_array(array($data, $func_name), $args);
+          $parameter = $data->$func_name($args);
           // Reactivate whatever errorhandling we had previously.
           restore_error_handler();
         }
@@ -371,13 +362,13 @@ class Objects {
           $method_data['declaration keywords'] .= ' abstract';
         }
         $method_data['declaration keywords'] = trim($method_data['declaration keywords']);
-         $result .= Objects::analyseMethod($method_data, $method);
+        $result .= Objects::analyseMethod($method_data, $method);
       }
       return $result;
 
     };
 
-    return call_user_func($analysis, $parameter);
+    return $analysis($parameter);
   }
 
   /**

@@ -26,6 +26,16 @@ use TYPO3\CMS\Extbase\Error\Message;
  */
 class Internals {
 
+  public static $nestingLevel = 0;
+
+  /**
+   * Sends the output to the browser during shutdown phase.
+   *
+   * @var \Krexx\ShutdownHandler
+   */
+  public static $shutdownHandler;
+
+
   /**
    * Unix timestamp, used to determine if we need to do an emergency break.
    *
@@ -47,7 +57,7 @@ class Internals {
    */
   public static function miniBenchTo(array $arg_t) {
     $tttime = round((end($arg_t) - $arg_t['start']) * 1000, 4);
-    $ar_aff['url'] = $_SERVER['REQUEST_URI'];
+    $ar_aff['url'] = Toolbox::getCurrentUrl();
     $ar_aff['total_time'] = $tttime;
     $prv_cle = 'start';
     $prv_val = $arg_t['start'];
@@ -80,14 +90,39 @@ class Internals {
    */
   public Static Function analysisHub(&$data, $name = '...') {
 
+    // Ceck memory and runtime.
+    if (!self::checkEmergencyBreak()) {
+      // No more took too long, or not enough memory is left.
+      Messages::addMessage("Emergency break for large output during rendering process.\n\nYou should try to switch to file output.");
+      return;
+    }
+
     // Object?
     if (is_object($data)) {
-      return Objects::analyseObject($data, $name);
+      self::$nestingLevel++;
+      if (self::$nestingLevel <= (int) Config::getConfigValue('deep', 'level')) {
+        $result = Objects::analyseObject($data, $name);
+        self::$nestingLevel--;
+        return $result;
+      }
+      else {
+        self::$nestingLevel--;
+        return Variables::analyseString("Object => Maximum for analysis reached. I will not go any further.\n To increase this value, change the deep => level setting.", $name);
+      }
     }
 
     // Array?
     if (is_array($data)) {
-      return Variables::analyseArray($data, $name);
+      self::$nestingLevel++;
+      if (self::$nestingLevel <= (int) Config::getConfigValue('deep', 'level')) {
+        $result = Variables::analyseArray($data, $name);
+        self::$nestingLevel--;
+        return $result;
+      }
+      else {
+        self::$nestingLevel--;
+        return Variables::analyseString("Array => Maximum for analysis reached. I will not go any further.\n To increase this value, change the deep => level setting.", $name);
+      }
     }
 
     // Resource?
@@ -244,10 +279,10 @@ class Internals {
     // because we need to display messages in the header.
     $footer = Toolbox::outputFooter($caller);
     $analysis = self::analysisHub($data);
-    \Krexx::$shutdownHandler->addChunkString(Toolbox::outputHeader($headline, $ignore_local_settings), $ignore_local_settings);
-    \Krexx::$shutdownHandler->addChunkString(Messages::outputMessages(), $ignore_local_settings);
-    \Krexx::$shutdownHandler->addChunkString($analysis, $ignore_local_settings);
-    \Krexx::$shutdownHandler->addChunkString($footer, $ignore_local_settings);
+    self::$shutdownHandler->addChunkString(Toolbox::outputHeader($headline, $ignore_local_settings), $ignore_local_settings);
+    self::$shutdownHandler->addChunkString(Messages::outputMessages(), $ignore_local_settings);
+    self::$shutdownHandler->addChunkString($analysis, $ignore_local_settings);
+    self::$shutdownHandler->addChunkString($footer, $ignore_local_settings);
 
     // Cleanup the hive, this removes all recursion markers.
     Hive::cleanupHive();
@@ -256,8 +291,6 @@ class Internals {
   /**
    * Outputs a backtrace.
    *
-   * @todo This is essentially copy pasta of the dump() function.
-   *   We need to refactor the two, to prevent code dublication.
    */
   public static function backtrace() {
     // Start the timer.
@@ -287,10 +320,10 @@ class Internals {
     $footer = Toolbox::outputFooter($caller);
     $analysis = Toolbox::outputBacktrace($backtrace);
 
-    \Krexx::$shutdownHandler->addChunkString(Toolbox::outputHeader($headline));
-    \Krexx::$shutdownHandler->addChunkString(Messages::outputMessages());
-    \Krexx::$shutdownHandler->addChunkString($analysis);
-    \Krexx::$shutdownHandler->addChunkString($footer);
+    self::$shutdownHandler->addChunkString(Toolbox::outputHeader($headline));
+    self::$shutdownHandler->addChunkString(Messages::outputMessages());
+    self::$shutdownHandler->addChunkString($analysis);
+    self::$shutdownHandler->addChunkString($footer);
 
     // Cleanup the hive, this removes all recursion markers.
     Hive::cleanupHive();
@@ -302,10 +335,13 @@ class Internals {
    * @return string
    *   The code, from where krexx was called
    */
-  protected static function findCaller() {
+  public static function findCaller() {
     $_ = debug_backtrace();
     while ($caller = array_pop($_)) {
-      if (strtolower(@$caller['function']) == 'krexx' || strtolower(@$caller['class']) == 'krexx') {
+      if (isset($caller['function']) && strtolower($caller['function']) == 'krexx') {
+        break;
+      }
+      if (isset($caller['class']) && strtolower($caller['class']) == 'krexx') {
         break;
       }
     }
@@ -341,7 +377,13 @@ class Internals {
    *   FALSE = we have a problem.
    */
   public static function checkEmergencyBreak() {
-    $result = TRUE;
+    static $result = TRUE;
+
+    if (!$result) {
+      // This has failed before!
+      // no need to check again!
+      return $result;
+    }
 
     // Check Runtime.
     if (self::$timer + (int) Config::getConfigValue('render', 'maxRuntime') <= time()) {

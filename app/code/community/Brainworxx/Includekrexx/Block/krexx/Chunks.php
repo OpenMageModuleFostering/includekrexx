@@ -48,7 +48,7 @@ class Chunks {
   /**
    * Splits a string into small chunks.
    *
-   * The chunks are saved to disk and later on
+   * The chunks are saved to disk and later on.
    *
    * @param string $string
    *   The data we want to split into chunks.
@@ -106,7 +106,7 @@ class Chunks {
     $filename = KREXXDIR . 'chunks/' . $key . '.Krexx.tmp';
     if (is_writable($filename)) {
       // Read the file.
-      $string = file_get_contents($filename);
+      $string = Toolbox::getFileContents($filename);
       // Delete it, we don't need it anymore.
       unlink($filename);
     }
@@ -185,13 +185,22 @@ class Chunks {
    *
    * Saves the output to a file.
    *
-   * @param string $filename
-   *   The path and the filename, where we want to save it.
    * @param string $string
    *   The chunked version of the output.
    */
-  public static function saveDechunkedToFile($filename, $string) {
+  public static function saveDechunkedToFile($string) {
     self::cleanupOldChunks();
+
+    // Cleanup old logfiles to prevent a overflow.
+    static $log_dir;
+    if (is_null($log_dir)) {
+      $log_dir = Config::getConfigValue('logging', 'folder') . DIRECTORY_SEPARATOR;
+    }
+    self::cleanupOldLogs($log_dir);
+
+    // Determine the filename.
+    $timestamp = Toolbox::fileStamp();
+    $filename = KREXXDIR . $log_dir . $timestamp . '.Krexx.html';
 
     $chunk_pos = strpos($string, '@@@');
 
@@ -230,6 +239,27 @@ class Chunks {
     }
 
     $been_here = TRUE;
+  }
+
+  /**
+   * Deletes old logfiles.
+   *
+   * @param string $log_dir
+   *   The directory with the logfiles.
+   */
+  protected static function cleanupOldLogs($log_dir) {
+    // Cleanup old logfiles to prevent a overflow.
+    $log_list = glob(KREXXDIR . $log_dir . "*.Krexx.html");
+    array_multisort(array_map('filemtime', $log_list), SORT_DESC, $log_list);
+    $max_file_count = (int) Config::getConfigValue('logging', 'maxfiles');
+    $count = 1;
+    // Cleanup logfiles.
+    foreach ($log_list as $file) {
+      if (is_writable($file) && $count >= $max_file_count) {
+        unlink($file);
+      }
+      $count++;
+    }
   }
 
   /**

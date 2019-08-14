@@ -32,6 +32,13 @@ class ShutdownHandler {
    * [1] -> Are we ignoring local settings?
    *
    * @var array
+   *   An array of all chunk strings.
+   *   A chunk string are be:
+   *   - header
+   *   - messages
+   *   - data part
+   *   - footer
+   *   This means, that every output is split in 4 parts
    */
   protected $chunkStrings = array();
 
@@ -44,7 +51,6 @@ class ShutdownHandler {
    *   Weather or not we ignore local settings.
    */
   public function addChunkString($chunk_string, $ignore_local_settings = FALSE) {
-
     $this->chunkStrings[] = array($chunk_string, $ignore_local_settings);
   }
 
@@ -54,11 +60,21 @@ class ShutdownHandler {
    * It gets called when PHP is sutting down. It will render
    * out kreXX output, to guarantie minimal interference with
    * the hosting CMS.
-   *
-   * @todo We need to call the renderer directly.
-   *
    */
   public function shutdownCallback() {
+    // Check for CLI and messages.
+    if (php_sapi_name() == "cli") {
+      $messages = Messages::outputMessages();
+      // Since we are in CLI mode, these messages are not in HTML.
+      // We can output them right away.
+      echo $messages;
+      // Something went wrong, better to stop right here.
+      return;
+    }
+
+    // Output our chunks.
+    // Every output is split into 4 chunk strings (header, messages,
+    // data, footer).
     foreach ($this->chunkStrings as $chunk_string) {
       Toolbox::outputNow($chunk_string[0], $chunk_string[1]);
     }

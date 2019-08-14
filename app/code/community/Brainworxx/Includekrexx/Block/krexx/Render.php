@@ -21,9 +21,6 @@ namespace Krexx;
 /**
  * This class hosts the internal rendering functions.
  *
- * @todo Refactor the whole class. We should do the template inserting
- *   stuff dynamically by using arrays.
- *
  * @package Krexx
  */
 class Render extends Help {
@@ -39,7 +36,6 @@ class Render extends Help {
    * Name of the skin currently in use.
    *
    * Gets set as soon as the css is being loaded.
-   * @todo This value should come from the config.
    *
    * @var string
    */
@@ -52,7 +48,7 @@ class Render extends Help {
    *   The version of kreXX.
    */
   Public Static Function version() {
-    return '1.2.2';
+    return '1.3.0';
   }
 
   /**
@@ -77,9 +73,11 @@ class Render extends Help {
    *   displayed is already not just escaped, but completely encoded. We need
    *   the value from the original string, which we get from the method, which
    *   calles this one.
+   * @param string $help_id
+   *   The id of the helptext we want to display here.
    *
-   * @return string
-   *   The generated markup from the template files.
+   * @return string The generated markup from the template files.
+   * The generated markup from the template files.
    */
   Public static function renderSingleChild($data, $name = '', $normal = '', $extra = FALSE, $type = '', $strlen = '', $help_id = '') {
     // This one is a little bit more complicated than the others,
@@ -160,7 +158,20 @@ class Render extends Help {
     $template = str_replace('{headline}', $headline, $template);
     $template = str_replace('{cssJs}', $css_js, $template);
     $template = str_replace('{KrexxId}', Hive::getMarker(), $template);
+    $template = str_replace('{search}', self::renderSearch(), $template);
 
+    return $template;
+  }
+
+  /**
+   * Renders the search button and the search menu.
+   *
+   * @return string
+   *   The generated markup from the template files.
+   */
+  public static function renderSearch() {
+    $template = self::getTemplateFileContent('search');
+    $template = str_replace('{KrexxId}', Hive::getMarker(), $template);
     return $template;
   }
 
@@ -216,13 +227,13 @@ class Render extends Help {
     $template = str_replace('{domId}', $dom_id, $template);
     // Are we expanding this one?
     if ($is_expanded) {
-      $style = 'display: block;';
+      $style = '';
     }
     else {
-      $style = 'display: none;';
+      $style = 'khidden';
     }
     $template = str_replace('{style}', $style, $template);
-    return str_replace('{mainfunction}', call_user_func($anon_function, $parameter), $template);
+    return str_replace('{mainfunction}', $anon_function($parameter), $template);
   }
 
   /**
@@ -261,11 +272,11 @@ class Render extends Help {
    *   The DOM id in the markup, in case we need to jup to this analysis result.
    * @param string $help_id
    *   The help id for this output, if available.
-   * @param string $is_expanded
+   * @param bool $is_expanded
    *   Is this one expanded from the beginning?
    *   TRUE when we render the settings menu only.
    *
-   * @return string
+   * @return string The generated markup from the template files.
    *   The generated markup from the template files.
    */
   Public static function renderExpandableChild($name, $type, \Closure $anon_function, &$parameter, $additional = '', $dom_id = '', $help_id = '', $is_expanded = FALSE) {
@@ -281,7 +292,7 @@ class Render extends Help {
       // Without a Name or Type I only display the Child with a Node.
       $template = self::getTemplateFileContent('expandableChildSimple');
       // Replace our stuff in the partial.
-      return str_replace('{mainfunction}', Chunks::chunkMe(call_user_func($anon_function, $parameter)), $template);
+      return str_replace('{mainfunction}', Chunks::chunkMe($anon_function($parameter)), $template);
     }
     else {
       // We need to render this one normally.
@@ -289,6 +300,15 @@ class Render extends Help {
       // Replace our stuff in the partial.
       $template = str_replace('{name}', $name, $template);
       $template = str_replace('{type}', $type, $template);
+
+      // Explode the type to get the classnames right.
+      $types = explode(' ', $type);
+      $css_type = '';
+      foreach ($types as $type) {
+        $css_type .= ' k' . $type;
+      }
+      $template = str_replace('{ktype}', $css_type, $template);
+
       $template = str_replace('{additional}', $additional, $template);
       $template = str_replace('{help}', self::renderHelp($help_id), $template);
 
@@ -315,16 +335,7 @@ class Render extends Help {
   protected static function getTemplateFileContent($what) {
     static $file_cache = array();
     if (!isset($file_cache[$what])) {
-
-      $file = KREXXDIR . 'skins/' . self::$skin . '/' . $what . '.html';
-      if (file_exists($file)) {
-        // Remove whitespace.
-        $file_cache[$what] = preg_replace('/\s+/', ' ', file_get_contents($file));
-      }
-      else {
-        Messages::addMessage('Template file ' . $file . ' not found');
-        $file_cache[$what] = 'Template file ' . $file . ' not found <br/>';
-      }
+      $file_cache[$what] = preg_replace('/\s+/', ' ', Toolbox::getFileContents(KREXXDIR . 'skins/' . self::$skin . '/' . $what . '.html'));
     }
     return $file_cache[$what];
   }
@@ -485,6 +496,7 @@ class Render extends Help {
     $template = str_replace('{cssJs}', $css_js, $template);
     $template = str_replace('{version}', self::version(), $template);
     $template = str_replace('{doctype}', $doctype, $template);
+    $template = str_replace('{search}', self::renderSearch(), $template);
 
     return str_replace('{KrexxId}', Hive::getMarker(), $template);
   }

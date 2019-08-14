@@ -1,3 +1,21 @@
+1.3.0
+- Added search function to the Hans skin.
+- Added collapse-everything-else to the Hans skin.
+- Added better recursion handling in the Hans skin.
+- Added administration for the FE config.
+- Added CLI detection and message handling in CLI.
+- Bugfix: Possible jQuery errors when the host site is
+  using the noConfict mode.
+- Bugfix: Refactored css of the Hans skin for minimal
+  interference with the host template. Most base64
+  images were replaced by unicode characters.
+- Bugfix: Possible false string encoding.
+
+1.2.1a and 1.2.2.a
+- Renamed the skin "schablon.com" to "schablon" to prevent
+  Chrome from telling the user that the download is unusual
+  See https://sourceforge.net/p/krexx/bugs/11/
+
 1.2.2
 - Bugfix: Removed interaction with the Magento backend
   template.
@@ -249,7 +267,7 @@
 
   0.8.2
 - Krumo raeumt sein Logverzeichnis selbststaendig auf.
-- Logverzeichnis lässt sich jetzt in der krumo.ini einstellen
+- Logverzeichnis lï¿½sst sich jetzt in der krumo.ini einstellen
 
 0.8.1
 - Einige Systeme (z.B. VTiger) speichern br's in der DB als
