@@ -64,6 +64,10 @@
             </td>
         </tr>
         <tr>
+            <td>IP Range:</td>
+            <td colspan="2">This setting is not editable on the frontend.</td>
+        </tr>
+        <tr>
             <td><label for="detectAjax">Try to detect AJAX requests:</label></td>
             <td>
                 <select name="runtime[detectAjax]" id="detectAjax">
@@ -120,46 +124,6 @@
                 <label for="factory.maxCall">Use factory settings</label>
             </td>
         </tr>
-        <tr>
-            <td><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
-            <td>
-                <select name="runtime[memoryLeft]" id="memoryLeft">
-                    <?php foreach ($data['settings'] as $key => $value) {
-                        if ($key == $settings['runtime']['memoryLeft']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        }
-                        ?>
-                        <option
-                            value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td>
-                <input id="factory.memoryLeft" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['memoryLeft']; ?>/>
-                <label for="factory.memoryLeft">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="maxRuntime">Maximum Runtime [Seconds]</label></td>
-            <td>
-                <select name="runtime[maxRuntime]" id="maxRuntime">
-                    <?php foreach ($data['settings'] as $key => $value) {
-                        if ($key == $settings['runtime']['maxRuntime']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        } ?>
-                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td>
-                <input id="factory.maxRuntime" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['maxRuntime']; ?>/>
-                <label for="factory.maxRuntime">Use factory settings</label>
-            </td>
-        </tr>
         <tr><td colspan="3">&nbsp;</td></tr>
 
         <tr>
@@ -186,10 +150,6 @@
         </tr>
         <tr>
             <td>Destination:</td>
-            <td colspan="2">This setting is not editable on the frontend.</td>
-        </tr>
-        <tr>
-            <td>Folder:</td>
             <td colspan="2">This setting is not editable on the frontend.</td>
         </tr>
         <tr>
@@ -287,25 +247,6 @@
             <th colspan="3"><b>Methods</b></th>
         </tr>
         <tr>
-            <td><label for="analyseMethodsAtall">Analyse class methods at all:</label></td>
-            <td>
-                <select name="methods[analyseMethodsAtall]" id="analyseMethodsAtall">
-                    <?php foreach ($data['settings'] as $key => $value) {
-                        if ($key == $settings['methods']['analyseMethodsAtall']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        } ?>
-                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td>
-                <input id="factory.analyseMethodsAtall" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseMethodsAtall']; ?>/>
-                <label for="factory.analyseMethodsAtall">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
             <td><label for="analyseProtectedMethods">Analyse protected class methods:</label></td>
             <td>
                 <select name="methods[analyseProtectedMethods]" id="analyseProtectedMethods">
@@ -375,25 +316,6 @@
             <td>
                 <input id="factory.registerAutomatically" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['registerAutomatically']; ?>/>
                 <label for="factory.registerAutomatically">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="backtraceAnalysis">Backtrace analysis settings:</label></td>
-            <td>
-                <select name="backtraceAndError[backtraceAnalysis]" id="backtraceAnalysis">
-                    <?php foreach ($data['settings'] as $key => $value) {
-                        if ($key == $settings['backtraceAndError']['backtraceAnalysis']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        }?>
-                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td>
-                <input id="factory.backtraceAnalysis" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['backtraceAnalysis']; ?>/>
-                <label for="factory.backtraceAnalysis">Use factory settings</label>
             </td>
         </tr>
     </table>

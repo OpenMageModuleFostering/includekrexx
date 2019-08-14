@@ -1,10 +1,41 @@
+2.0.1
+- Refactored the configuration and introduced models there.
+- Removed the \Krexx::enable() call.
+- Removed configurations, that nobody was editing anyway.
+- Added a ip mask to whitelist ip's that can trigger kreXX.
+- Bugfix: Rendering of the 'extra' part for long string works
+  now correctly.
+- Bugfix: Sourcecode generation for Traversable classes should
+  work now for none ArrayAccess classes.
+- Bugfix: A string with the value of '0' will get displayed again.
+- Bugfix: Fixed a notice in the \Krexx::backtrace();
+- Change: Added the method arguments to the method analysis in the
+  smokygrey skin.
+
+2.0.0
+- Added sourcecode to the closure analysis.
+- Prettified the sourcecode display in the smokygrey skin.
+- Change: Removed the code generation for Traversals that can
+  not be accessed via chaining.
+- Change: Removed the unnecessary fluff from the source generation.
+  Stuff like '$kresult =' is now gone.
+- Change: Refactored pretty much everything and introduced something
+  that looks remotely like MVC.
+- Bugfix: Code generation is now working when krexx is called via
+  'Krexx::'.
+- Bugfix: Wrong line number in the fatal error handler.
+- Bugfix: Code generation for class constants now works properly.
+- Bugfix: Removed a  warning with the glob() function which may
+  occur on some systems.
+- Bugfix: Added a check to the developer handle tp prevent warnings.
+
 1.4.2
 - Added analysis metadata to the file output.
 - Change: Restructured the configuration options. The sorting does now
   make more sense than before.
 - Change: The logging options can never be changed on the frontend.
 - Change: The debug methods can never be changed on the frontend.
-- Bufix / Change: Removed the whole dual-output mess.
+- Bugfix / Change: Removed the whole dual-output mess.
 - Change: When the destination is set to 'file' via config file, this
   value can not be overwritten with local cookie settings.
 - Change: Unclunked the Smokey-Grey skin.
@@ -15,7 +46,7 @@
   files, and not 9.
 - Bugfix: The debug output might jump around, in some special css
   environments.
-- Bufix: Proper handling of broken html output from the hosting CMS.
+- Bugfix: Proper handling of broken html output from the hosting CMS.
 
 1.4.1
 - Added class constants analysis.

@@ -61,6 +61,22 @@
                 <label for="factory.disabled">Use factory settings</label>
             </td>
         </tr>
+
+        <tr>
+            <td><label for="iprange">IP Range:</label></td>
+            <td>
+                <div class="link-store-scope" title="<?php echo $help['iprange']; ?>"></div>
+            </td>
+            <td>
+                <input type="text" value="<?php echo $settings['runtime']['iprange']; ?>" name="runtime[iprange]" id="iprange">
+            </td>
+            <td>
+                <input id="factory.iprange" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['iprange']; ?>/>
+                <label for="factory.iprange">Use factory settings</label>
+            </td>
+        </tr>
+
+
         <tr>
             <td>
                 <label for="detectAjax">Try to detect AJAX requests:</label>
@@ -112,32 +128,6 @@
             </td>
         </tr>
         <tr>
-            <td><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
-            <td>
-                <div class="link-store-scope" title="<?php echo $help['memoryLeft']; ?>"></div>
-            </td>
-            <td>
-                <input type="text" value="<?php echo $settings['runtime']['memoryLeft']; ?>" name="runtime[memoryLeft]" id="memoryLeft">
-            </td>
-            <td>
-                <input id="factory.memoryLeft" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['memoryLeft']; ?>/>
-                <label for="factory.memoryLeft">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td ><label for="maxRuntime">Maximum Runtime [Seconds]</label></td>
-            <td >
-                <div class="link-store-scope" title="<?php echo $help['maxRuntime']; ?>"></div>
-            </td>
-            <td >
-                <input type="text" value="<?php echo $settings['runtime']['maxRuntime']; ?>" name="runtime[maxRuntime]" id="maxRuntime">
-            </td>
-            <td >
-                <input id="factory.maxRuntime" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['maxRuntime']; ?>/>
-                <label for="factory.maxRuntime">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
             <td colspan="4">&nbsp;</td>
         </tr>
 
@@ -184,19 +174,6 @@
             <td >
                 <input id="factory.destination" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['destination']; ?>/>
                 <label for="factory.destination">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="folder">Folder:</label></td>
-            <td>
-                <div class="link-store-scope" title="<?php echo $help['folder']; ?>"></div>
-            </td>
-            <td>
-                <input type="text" value="<?php echo $settings['output']['folder']; ?>" name="output[folder]" id="folder">
-            </td>
-            <td>
-                <input id="factory.folder" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['folder']; ?>/>
-                <label for="factory.folder">Use factory settings</label>
             </td>
         </tr>
         <tr>
@@ -314,28 +291,6 @@
             <th colspan="4"><b>Methods</b></th>
         </tr>
         <tr>
-            <td><label for="analyseMethodsAtall">Analyse class methods at all:</label></td>
-            <td>
-                <div class="link-store-scope" title="<?php echo $help['analyseMethodsAtall']; ?>"></div>
-            </td>
-            <td>
-                <select name="methods[analyseMethodsAtall]" id="analyseMethodsAtall">
-                    <?php foreach ($this->getSelectBool() as $key => $value) {
-                        if ($value == $settings['methods']['analyseMethodsAtall']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        } ?>
-                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td >
-                <input id="factory.analyseMethodsAtall" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseMethodsAtall']; ?>/>
-                <label for="factory.analyseMethodsAtall">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
             <td><label for="analyseProtectedMethods">Analyse protected class methods:</label></td>
             <td>
                 <div class="link-store-scope" title="<?php echo $help['analyseProtectedMethods']; ?>"></div>
@@ -420,28 +375,6 @@
             <td>
                 <input id="factory.registerAutomatically" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['registerAutomatically']; ?>/>
                 <label for="factory.registerAutomatically">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="backtraceAnalysis">Backtrace analysis settings:</label></td>
-            <td>
-                <div class="link-store-scope" title="<?php echo $help['backtraceAnalysis']; ?>"></div>
-            </td>
-            <td>
-                <select name="backtraceAndError[backtraceAnalysis]" id="backtraceAnalysis">
-                    <?php foreach ($this->getSelectBacktrace() as $key => $value) {
-                        if ($value == $settings['backtraceAndError']['backtraceAnalysis']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        } ?>
-                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td>
-                <input id="factory.backtraceAnalysis" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['backtraceAnalysis']; ?>/>
-                <label for="factory.backtraceAnalysis">Use factory settings</label>
             </td>
         </tr>
         <tr>

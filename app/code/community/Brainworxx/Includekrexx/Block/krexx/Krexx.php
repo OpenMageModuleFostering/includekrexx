@@ -31,17 +31,7 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-use Brainworxx\Krexx\Analysis\Hive;
-use Brainworxx\Krexx\Errorhandler\Fatal;
-use Brainworxx\Krexx\Framework\Config;
-use Brainworxx\Krexx\Framework\Internals;
-use Brainworxx\Krexx\Framework\ShutdownHandler;
-
-use Brainworxx\Krexx\Framework\Chunks;
-use Brainworxx\Krexx\View\Render;
-use Brainworxx\Krexx\View\Messages;
-use Brainworxx\Krexx\View\Help;
-use Brainworxx\Krexx\View\Output;
+use Brainworxx\Krexx\Service\Storage;
 
 /**
  * Alias function for object analysis.
@@ -57,7 +47,7 @@ use Brainworxx\Krexx\View\Output;
  */
 function krexx($data = null, $handle = '')
 {
-    if ($handle == '') {
+    if (empty($handle)) {
         \Krexx::open($data);
     } else {
         \Krexx::$handle($data);
@@ -74,38 +64,12 @@ function krexx($data = null, $handle = '')
  */
 class Krexx
 {
-
     /**
-     * Here we store the fatal error handler.
+     * Our storage wher we keep al relevant classes.
      *
-     * @var \Brainworxx\Krexx\Errorhandler\Fatal
+     * @var Storage
      */
-    protected static $krexxFatal;
-
-    /**
-     * Stores whether out fatal error handler should be active.
-     *
-     * During a kreXX analysis, we deactivate it to improve performance.
-     * Here we save, whether we should reactivate it.
-     *
-     * @var boolean
-     */
-    protected static $fatalShouldActive = false;
-
-    /**
-     * Here we save all timekeeping stuff.
-     *
-     * @var string array
-     */
-    protected static $timekeeping = array();
-
-    /**
-     * Remembers, if the header or footer must be printed.
-     *
-     * @var int
-     */
-    protected static $startRun = 0;
-    protected static $counterCache = array();
+    public static $storage;
 
     /**
      * Includes all needed files and sets some internal values.
@@ -113,74 +77,42 @@ class Krexx
     public static function bootstrapKrexx()
     {
 
-        $krexxdir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-        include_once $krexxdir . 'src/view/Help.php';
-        include_once $krexxdir . 'src/view/Render.php';
-        include_once $krexxdir . 'src/view/Messages.php';
-        include_once $krexxdir . 'src/view/Codegen.php';
-        include_once $krexxdir . 'src/view/Output.php';
-        include_once $krexxdir . 'src/framework/Config.php';
-        include_once $krexxdir . 'src/framework/Toolbox.php';
-        include_once $krexxdir . 'src/framework/Chunks.php';
-        include_once $krexxdir . 'src/framework/ShutdownHandler.php';
-        include_once $krexxdir . 'src/framework/Internals.php';
-        include_once $krexxdir . 'src/analysis/objects/Comments.php';
-        include_once $krexxdir . 'src/analysis/objects/Flection.php';
-        include_once $krexxdir . 'src/analysis/objects/Methods.php';
-        include_once $krexxdir . 'src/analysis/objects/Objects.php';
-        include_once $krexxdir . 'src/analysis/objects/Properties.php';
-        include_once $krexxdir . 'src/analysis/Hive.php';
-        include_once $krexxdir . 'src/analysis/Variables.php';
-        include_once $krexxdir . 'src/errorhandler/AbstractHandler.php';
-        include_once $krexxdir . 'src/errorhandler/Fatal.php';
+        $krexxDir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+        include_once $krexxDir . 'src/service/view/Help.php';
+        include_once $krexxDir . 'src/service/view/Render.php';
+        include_once $krexxDir . 'src/service/view/Messages.php';
+        include_once $krexxDir . 'src/service/config/Model.php';
+        include_once $krexxDir . 'src/service/config/Fallback.php';
+        include_once $krexxDir . 'src/service/config/Security.php';
+        include_once $krexxDir . 'src/service/config/Config.php';
+        include_once $krexxDir . 'src/service/misc/Codegen.php';
+        include_once $krexxDir . 'src/service/misc/Chunks.php';
+        include_once $krexxDir . 'src/service/misc/Shutdown.php';
+        include_once $krexxDir . 'src/service/Storage.php';
+        include_once $krexxDir . 'src/service/flow/Recursion.php';
 
-        Config::$krexxdir = $krexxdir;
+        include_once $krexxDir . 'src/service/flow/Emergency.php';
+        include_once $krexxDir . 'src/analysis/Flection.php';
+        include_once $krexxDir . 'src/analysis/Routing.php';
+        include_once $krexxDir . 'src/analysis/Model.php';
+        include_once $krexxDir . 'src/analysis/callback/AbstractCallback.php';
+        include_once $krexxDir . 'src/analysis/callback/analyse/BacktraceStep.php';
+        include_once $krexxDir . 'src/analysis/callback/analyse/ConfigSection.php';
+        include_once $krexxDir . 'src/analysis/callback/analyse/Debug.php';
+        include_once $krexxDir . 'src/analysis/callback/analyse/Objects.php';
+        include_once $krexxDir . 'src/analysis/callback/iterate/ThroughArray.php';
+        include_once $krexxDir . 'src/analysis/callback/iterate/ThroughConfig.php';
+        include_once $krexxDir . 'src/analysis/callback/iterate/ThroughConstants.php';
+        include_once $krexxDir . 'src/analysis/callback/iterate/ThroughMethodAnalysis.php';
+        include_once $krexxDir . 'src/analysis/callback/iterate/ThroughMethods.php';
+        include_once $krexxDir . 'src/analysis/callback/iterate/ThroughProperties.php';
+        include_once $krexxDir . 'src/errorhandler/Error.php';
+        include_once $krexxDir . 'src/errorhandler/Fatal.php';
+        include_once $krexxDir . 'src/controller/Internals.php';
+        include_once $krexxDir . 'src/controller/OutputActions.php';
 
-        // Setting the skin info.
-        if (is_null(Render::$skin)) {
-            Render::$skin = Config::getConfigValue('output', 'skin');
-        }
-        // Every skin has an own implementation of the render class. We need to
-        // include this one, too.
-        include_once $krexxdir . 'resources/skins/' . Config::getConfigValue('output', 'skin') . '/SkinRender.php';
-
-        // Register our shutdown handler. He will handle the display
-        // of kreXX after the hosting CMS is finished.
-        Internals::$shutdownHandler = new ShutdownHandler();
-        register_shutdown_function(array(
-          Internals::$shutdownHandler,
-          'shutdownCallback'
-        ));
-
-        // Check if the log and chunk folder are writable.
-        // If not, give feedback!
-        if (!is_writeable($krexxdir . 'chunks' . DIRECTORY_SEPARATOR)) {
-            $chunkFolder = $krexxdir . 'chunks' . DIRECTORY_SEPARATOR;
-            Messages::addMessage(
-                'Chunksfolder ' . $chunkFolder . ' is not writable!' .
-                'This will increase the memory usage of kreXX significantly!',
-                'critical'
-            );
-            Messages::addKey('protected.folder.chunk', array($krexxdir . 'chunks' . DIRECTORY_SEPARATOR));
-            // We can work without chunks, but this will require much more memory!
-            Chunks::setUseChunks(false);
-        }
-        if (!is_writeable($krexxdir . Config::getConfigValue('output', 'folder') . DIRECTORY_SEPARATOR)) {
-            $logFolder = $krexxdir . Config::getConfigValue('output', 'folder') . DIRECTORY_SEPARATOR;
-            Messages::addMessage('Logfolder ' . $logFolder . ' is not writable !', 'critical');
-            Messages::addKey(
-                'protected.folder.log',
-                array($krexxdir . Config::getConfigValue('output', 'folder') . DIRECTORY_SEPARATOR)
-            );
-        }
-        // At this point, we won't inform the dev right away. The error message
-        // will pop up, when kreXX is actually displayed, no need to bother the
-        // dev just now.
-        // We might need to register our Backtracer.
-        if (Config::getConfigValue('backtraceAndError', 'registerAutomatically') == 'true') {
-            self::registerFatal();
-        }
-
+        // Create a new storage where we sotre all our classes.
+        self::$storage = new Storage($krexxDir);
     }
 
     /**
@@ -193,10 +125,10 @@ class Krexx
      */
     public static function __callStatic($name, array $arguments)
     {
-        self::noFatalForKrexx();
+        self::$storage->controller->noFatalForKrexx();
         // Do we gave a handle?
-        $handle = Config::getConfigFromCookies('deep', 'Local open function');
-        if ($name == $handle) {
+        $handle = self::$storage->config->getDevHandler();
+        if ($name === $handle) {
             // We do a standard-open.
             if (isset($arguments[0])) {
                 self::open($arguments[0]);
@@ -204,7 +136,7 @@ class Krexx
                 self::open();
             }
         }
-        self::reFatalAfterKrexx();
+        self::$storage->controller->reFatalAfterKrexx();
     }
 
     /**
@@ -216,23 +148,13 @@ class Krexx
      */
     public static function timerMoment($string)
     {
-        self::noFatalForKrexx();
+        self::$storage->controller->noFatalForKrexx();
         // Disabled?
-        if (!Config::isEnabled()) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
-
-        // Did we use this one before?
-        if (isset(self::$counterCache[$string])) {
-            // Add another to the counter.
-            self::$counterCache[$string]++;
-            self::$timekeeping['[' . self::$counterCache[$string] . ']' . $string] = microtime(true);
-        } else {
-            // First time counter, set it to 1.
-            self::$counterCache[$string] = 1;
-            self::$timekeeping[$string] = microtime(true);
-        }
-        self::reFatalAfterKrexx();
+        self::$storage->controller->timerAction($string);
+        self::$storage->controller->reFatalAfterKrexx();
     }
 
     /**
@@ -240,15 +162,13 @@ class Krexx
      */
     public static function timerEnd()
     {
-        self::noFatalForKrexx();
+        self::$storage->controller->noFatalForKrexx();
         // Disabled ?
-        if (!Config::isEnabled()) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
-        self::timerMoment('end');
-        // And we are done. Feedback to the user.
-        Internals::dump(Internals::miniBenchTo(self::$timekeeping), 'kreXX timer');
-        self::reFatalAfterKrexx();
+        self::$storage->controller->timerEndAction();
+        self::$storage->controller->reFatalAfterKrexx();
     }
 
     /**
@@ -259,13 +179,13 @@ class Krexx
      */
     public static function open($data = null)
     {
-        self::noFatalForKrexx();
+        self::$storage->controller->noFatalForKrexx();
         // Disabled?
-        if (!Config::isEnabled()) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
-        Internals::dump($data);
-        self::reFatalAfterKrexx();
+        self::$storage->controller->dumpAction($data);
+        self::$storage->controller->reFatalAfterKrexx();
     }
 
     /**
@@ -276,24 +196,14 @@ class Krexx
      */
     public static function backtrace()
     {
-        self::noFatalForKrexx();
+        self::$storage->controller->noFatalForKrexx();
         // Disabled?
-        if (!Config::isEnabled()) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
         // Render it.
-        Internals::backtrace();
-        self::reFatalAfterKrexx();
-    }
-
-    /**
-     * Enable kreXX.
-     */
-    public static function enable()
-    {
-        self::noFatalForKrexx();
-        Config::isEnabled(true);
-        self::reFatalAfterKrexx();
+        self::$storage->controller->backtraceAction();
+        self::$storage->controller->reFatalAfterKrexx();
     }
 
     /**
@@ -301,8 +211,8 @@ class Krexx
      */
     public static function disable()
     {
-        self::noFatalForKrexx();
-        Config::isEnabled(false);
+        self::$storage->controller->noFatalForKrexx();
+        self::$storage->config->setDisabled(true);
         // We will not re-enable it afterwards, because kreXX
         // is disabled and the handler would not show up anyway.
     }
@@ -314,28 +224,14 @@ class Krexx
      */
     public static function editSettings()
     {
-        self::noFatalForKrexx();
+        self::$storage->controller->noFatalForKrexx();
         // Disabled?
         // We are ignoring local settings here.
-        if (!Config::isEnabled(null)) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
-        Internals::$timer = time();
-
-        // Find caller.
-        $caller = Internals::findCaller();
-        $caller['type'] = 'Cookie Configuration';
-        Chunks::addMetadata($caller);
-
-        // Render it.
-        Render::$KrexxCount++;
-        $footer = Output::outputFooter($caller, true);
-        Internals::$shutdownHandler->addChunkString(Output::outputHeader('Edit local settings'));
-        Internals::$shutdownHandler->addChunkString($footer);
-
-        // Cleanup the hive.
-        Hive::cleanupHive();
-        self::reFatalAfterKrexx();
+        self::$storage->controller->editSettingsAction();
+        self::$storage->controller->reFatalAfterKrexx();
     }
 
     /**
@@ -346,34 +242,10 @@ class Krexx
     public static function registerFatal()
     {
         // Disabled?
-        if (!Config::isEnabled()) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
-
-        // As of PHP Version 7.0.2, the register_tick_function() causesPHP to crash,
-        // with a connection reset! We need to check the version to avoid this, and
-        // then tell the dev what happened.
-        if (version_compare(phpversion(), '7.0.0', '>=')) {
-            // Too high! 420 Method Failure :-(
-            Messages::addMessage(Help::getHelp('php7yellow'));
-            krexx(Help::getHelp('php7'));
-
-            // Just return, there is nothing more to do here.
-            return;
-        }
-
-        // Do we need another shutdown handler?
-        if (!is_object(self::$krexxFatal)) {
-            self::$krexxFatal = new Fatal();
-            declare(ticks = 1);
-            register_shutdown_function(array(
-              self::$krexxFatal,
-              'shutdownCallback',
-            ));
-        }
-        register_tick_function(array(self::$krexxFatal, 'tickCallback'));
-        self::$krexxFatal->setIsActive(true);
-        self::$fatalShouldActive = true;
+        self::$storage->controller->registerFatalAction();
     }
 
     /**
@@ -386,44 +258,9 @@ class Krexx
     public static function unregisterFatal()
     {
         // Disabled?
-        if (!Config::isEnabled()) {
+        if (self::$storage->config->getSetting('disabled')) {
             return;
         }
-
-        if (!is_null(self::$krexxFatal)) {
-            // Now we need to tell the shutdown function, that is must
-            // not do anything on shutdown.
-            self::$krexxFatal->setIsActive(false);
-            unregister_tick_function(array(self::$krexxFatal, 'tickCallback'));
-        }
-        self::$fatalShouldActive = false;
-    }
-
-    /**
-     * Disables the fatal handler and the tick callback.
-     *
-     * We disable the tick callback and the error handler during
-     * a analysis, to generate faster output.
-     */
-    protected static function noFatalForKrexx()
-    {
-        if (self::$fatalShouldActive) {
-            self::$krexxFatal->setIsActive(false);
-            unregister_tick_function(array(self::$krexxFatal, 'tickCallback'));
-        }
-    }
-
-    /**
-     * Re-enable the fatal handler and the tick callback.
-     *
-     * We disable the tick callback and the error handler during
-     * a analysis, to generate faster output.
-     */
-    protected static function reFatalAfterKrexx()
-    {
-        if (self::$fatalShouldActive) {
-            self::$krexxFatal->setIsActive(true);
-            register_tick_function(array(self::$krexxFatal, 'tickCallback'));
-        }
+        self::$storage->controller->unregisterFatalAction();
     }
 }

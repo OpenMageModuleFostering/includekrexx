@@ -1,20 +1,20 @@
 <?php
-
 /**
- * @file
- *   Magento backend block for kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -32,10 +32,8 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-use Brainworxx\Krexx\Framework\Config;
-
 /**
- * Class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig
+ * Block for the frontend configuration in the backend.
  */
 class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminhtml_Block_Template
 {
@@ -68,6 +66,8 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
         $data = array();
         $settings = array();
         $factory = array();
+        $storage = \Krexx::$storage;
+
         // Setting possible form values.
         $data['settings'] = array(
             'full' => 'full edit',
@@ -78,52 +78,40 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
         // See, if we have any values in the configuration file.
         // See, if we have any values in the configuration file.
         $settings['output']['skin'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('skin')
-        );
-        $settings['runtime']['memoryLeft'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('memoryLeft')
-        );
-        $settings['runtime']['maxRuntime'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('maxRuntime')
+            $storage->config->getFeConfigFromFile('skin')
         );
         $settings['runtime']['maxCall'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('maxCall')
+            $storage->config->getFeConfigFromFile('maxCall')
         );
         $settings['runtime']['disabled'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('disabled')
+            $storage->config->getFeConfigFromFile('disabled')
         );
         $settings['runtime']['detectAjax'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('detectAjax')
+            $storage->config->getFeConfigFromFile('detectAjax')
         );
         $settings['properties']['analyseProtected'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analyseProtected')
+            $storage->config->getFeConfigFromFile('analyseProtected')
         );
         $settings['properties']['analysePrivate'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analysePrivate')
+            $storage->config->getFeConfigFromFile('analysePrivate')
         );
         $settings['properties']['analyseTraversable'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analyseTraversable')
+            $storage->config->getFeConfigFromFile('analyseTraversable')
         );
         $settings['properties']['analyseConstants'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analyseConstants')
+            $storage->config->getFeConfigFromFile('analyseConstants')
         );
         $settings['runtime']['level'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('level')
-        );
-        $settings['methods']['analyseMethodsAtall'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analyseMethodsAtall')
+            $storage->config->getFeConfigFromFile('level')
         );
         $settings['methods']['analyseProtectedMethods'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analyseProtectedMethods')
+            $storage->config->getFeConfigFromFile('analyseProtectedMethods')
         );
         $settings['methods']['analysePrivateMethods'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('analysePrivateMethods')
+            $storage->config->getFeConfigFromFile('analysePrivateMethods')
         );
         $settings['backtraceAndError']['registerAutomatically'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('registerAutomatically')
-        );
-        $settings['backtraceAndError']['backtraceAnalysis'] = $this->convertKrexxFeSetting(
-            Config::getFeConfigFromFile('backtraceAnalysis')
+            $storage->config->getFeConfigFromFile('registerAutomatically')
         );
 
         // Are these actually set?
@@ -134,7 +122,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
                     // We need to fill these values with the stuff from the
                     // factory settings!
                     $settings[$mainkey][$attribute] = $this->convertKrexxFeSetting(
-                        Config::$feConfigFallback[$attribute]
+                        $storage->config->feConfigFallback[$attribute]
                     );
                 } else {
                     $factory[$attribute] = '';

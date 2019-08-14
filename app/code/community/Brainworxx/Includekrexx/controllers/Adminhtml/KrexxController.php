@@ -1,20 +1,20 @@
 <?php
-
 /**
- * @file
- *   Magento backend controller for kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -32,10 +32,8 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-use Brainworxx\Krexx\View\Messages;
-
 /**
- * Class Brainworxx_Includekrexx_Adminhtml_KrexxController
+ * Magento backend controller for kreXX
  */
 class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_Controller_Action
 {
@@ -47,9 +45,6 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
      */
     protected $allowedSettingsNames = array(
         'skin',
-        'memoryLeft',
-        'maxRuntime',
-        'folder',
         'maxfiles',
         'destination',
         'maxCall',
@@ -60,12 +55,12 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
         'analyseTraversable',
         'debugMethods',
         'level',
-        'analyseMethodsAtall',
         'analyseProtectedMethods',
         'analysePrivateMethods',
         'registerAutomatically',
         'backtraceAnalysis',
         'analyseConstants',
+        'iprange',
     );
 
     /**
@@ -81,6 +76,11 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
         'backtraceAndError',
     );
 
+    /**
+     * Internal security call, to show if the current backenduser is allowed here.
+     *
+     * @return bool
+     */
     protected function _isAllowed()
     {
         $actionName = $this->getFullActionName();
@@ -169,7 +169,9 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
     {
         $arguments = $this->getRequest()->getPost();
         $all_ok = true;
-        $filepath = \Brainworxx\Krexx\Framework\Config::getPathToIni();
+        $storage = \Krexx::$storage;
+
+        $filepath = $storage->config->krexxdir. 'Krexx.ini';
         // We must preserve the section 'feEditing'.
         // Everything else will be overwritten.
         $old_values = parse_ini_file($filepath, true);
@@ -184,7 +186,7 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
                         // We escape the value, just in case, since we can not whitelist it.
                         $value = htmlspecialchars(preg_replace('/\s+/', '', $value));
                         // Evaluate the setting!
-                        if (\Brainworxx\Krexx\Framework\Config::evaluateSetting($section, $setting_name, $value)) {
+                        if ($storage->config->security->evaluateSetting($section, $setting_name, $value)) {
                             $old_values[$section][$setting_name] = $value;
                         } else {
                             // Validation failed! kreXX will generate a message, which we will
@@ -210,14 +212,14 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
             $file = new Varien_Io_File();
             if ($file->write($filepath, $ini) === false) {
                 $all_ok = false;
-                Messages::addMessage('Configuration file ' . $filepath . ' is not writeable!');
+                $storage->messages->addMessage('Configuration file ' . $filepath . ' is not writeable!');
             }
         }
 
         // Something went wrong, we need to tell the user.
         if (!$all_ok) {
             Mage::getSingleton('core/session')->addError(
-                strip_tags(Messages::outputMessages()),
+                strip_tags($storage->messages->outputMessages()),
                 "The settings were NOT saved."
             );
         } else {
@@ -238,7 +240,9 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
     {
         $arguments = $this->getRequest()->getPost();
         $all_ok = true;
-        $filepath = \Brainworxx\Krexx\Framework\Config::getPathToIni();
+        $storage = \Krexx::$storage;
+        $filepath = $storage->config->krexxdir. 'Krexx.ini';
+
         // Whitelist of the vales we are accepting.
         $allowed_values = array('full', 'display', 'none');
 
@@ -249,7 +253,6 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
 
         // We need to correct the allowed settings, since we do not allow anything.
         unset($this->allowedSettingsNames['destination']);
-        unset($this->allowedSettingsNames['folder']);
         unset($this->allowedSettingsNames['maxfiles']);
         unset($this->allowedSettingsNames['debugMethods']);
 
@@ -263,7 +266,7 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
                     } else {
                         // Validation failed!
                         $all_ok = false;
-                        Messages::addMessage(htmlentities($value) . ' is not an allowed value!');
+                        $storage->messages->addMessage(htmlentities($value) . ' is not an allowed value!');
                     }
                 }
             }
@@ -283,14 +286,14 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
             $file = new Varien_Io_File();
             if ($file->write($filepath, $ini) === false) {
                 $all_ok = false;
-                Messages::addMessage('Configuration file ' . $filepath . ' is not writeable!');
+                $storage->messages->addMessage('Configuration file ' . $filepath . ' is not writeable!');
             }
         }
 
         // Something went wrong, we need to tell the user.
         if (!$all_ok) {
             Mage::getSingleton('core/session')->addError(
-                strip_tags(Messages::outputMessages()),
+                strip_tags($storage->messages->outputMessages()),
                 "The settings were NOT saved."
             );
         } else {

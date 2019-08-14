@@ -1,20 +1,20 @@
 <?php
-
 /**
- * @file
- *   Magento backend controller for kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -32,15 +32,18 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-use Brainworxx\Krexx\Framework\Config;
-
 /**
- * Class Brainworxx_Includekrexx_Adminhtml_KrexxController
+ * Logfile controller for backend logfile access.
  */
 class Brainworxx_Includekrexx_Adminhtml_KrexxlogController extends Mage_Adminhtml_Controller_Action
 {
 
 
+    /**
+     * Internal security call, to show if the current backenduser is allowed here.
+     *
+     * @return bool
+     */
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('system/krexx/krexxlog');
@@ -79,10 +82,12 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxlogController extends Mage_Adminhtm
      */
     public function getContentAction()
     {
+        $storage = \Krexx::$storage;
+
         // No directory traversal for you!
         $id = preg_replace('/[^0-9]/', '', $this->getRequest()->get('id'));
         // Get the filepath.
-        $file = Config::$krexxdir . Config::getConfigValue('output', 'folder') . DIRECTORY_SEPARATOR . $id . '.Krexx.html';
+        $file = $storage->config->krexxdir . 'log' . DIRECTORY_SEPARATOR . $id . '.Krexx.html';
 
         $ioFile = new Varien_Io_File();
         if ($ioFile->streamOpen($file, 'rb')) {
@@ -98,7 +103,7 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxlogController extends Mage_Adminhtm
             }
             $ioFile->streamClose();
         } else {
-             Mage::getSingleton('core/session')->addError('File: ' . $file . ' is not readable!');
+            Mage::getSingleton('core/session')->addError('File: ' . $file . ' is not readable!');
         }
     }
 }

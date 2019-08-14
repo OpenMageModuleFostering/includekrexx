@@ -1,19 +1,20 @@
 <?php
 /**
- * @file
- *   Fatal errorhandler for kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -33,39 +34,13 @@
 
 namespace Brainworxx\Krexx\Errorhandler;
 
-use Brainworxx\Krexx\Framework\Config;
-use Brainworxx\Krexx\Framework\Toolbox;
-
 /**
  * PHP 5.x fatal error handler.
  *
  * @package Brainworxx\Krexx\Errorhandler
  */
-class Fatal extends AbstractHandler
+class Fatal extends Error
 {
-
-    /**
-     * Config for the 'deep' backtrace analysis.
-     *
-     * When we are handling fatal errors, we should display as much
-     * internal info as possible. We will use this config to overwrite
-     * the settings, in case we are handling a fatal error.
-     *
-     * @var array
-     */
-    protected static $configFatal = array(
-        'properties' => array(
-            'analyseProtected' => 'true',
-            'analysePrivate' => 'true',
-            'analyseTraversable' => 'true',
-            'analyseConstants' => 'true',
-        ),
-        'methods' => array(
-            'analyseMethodsAtall' => 'true',
-            'analyseProtectedMethods' => 'true',
-            'analysePrivateMethods' => 'true',
-        ),
-    );
 
     /**
      * The current backtrace from the registered tick callback.
@@ -118,39 +93,27 @@ class Fatal extends AbstractHandler
         $error = error_get_last();
 
         // Do we have an error at all?
-        if (!is_null($error) && $this->getIsActive()) {
-            // We will not generate any code here!
-            Config::$allowCodegen = false;
-
+        if (!is_null($error) &&
+            $this->getIsActive()
+        ) {
             // Do we need to check this one, according to our settings?
             $translatedError = $this->translateErrorType($error['type']);
-            if ($translatedError[1] == 'traceFatals') {
-                // We don't want to analyse the errorhandler, that will only
-                // be misleading.
-                unset($this->tickedBacktrace[0]);
-
+            if ($translatedError[1] === 'traceFatals') {
                 // We also need to prepare some Data we want to display.
                 $errorType = $this->translateErrorType($error['type']);
 
-                // We need to correct the error line.
-                $error['line']--;
-
+                // We prepare the error as far as we can here.
+                // The adding of the sourcecode happens in the controller.
                 $errorData = array(
                     'type' => $errorType[0],
                     'errstr' => $error['message'],
                     'errfile' => $error['file'],
                     'errline' => $error['line'],
                     'handler' => __FUNCTION__,
-                    'source' => Toolbox::readSourcecode($error['file'], $error['line'], 5),
+                    'file' => $error['file'],
                     'backtrace' => $this->tickedBacktrace,
                 );
-
-                if (Config::getConfigValue('backtraceAndError', 'backtraceAnalysis') == 'deep') {
-                    // We overwrite the local settings, so we can get as much info from
-                    // analysed objects as possible.
-                    Config::overwriteLocalSettings(self::$configFatal);
-                }
-                $this->giveFeedback($errorData);
+                $this->storage->controller->errorAction($errorData);
             }
         }
         // Clean exit.

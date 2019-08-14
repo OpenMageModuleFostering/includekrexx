@@ -1,20 +1,20 @@
 <?php
-
 /**
- * @file
- *   Magento backend block for kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -32,12 +32,9 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-use Brainworxx\Krexx\View\Help;
-use Brainworxx\Krexx\Framework\Config;
-use Brainworxx\Krexx\View\Messages;
 
 /**
- * Class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config
+ * Block for the configuration file editor in the backend.
  */
 class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml_Block_Template
 {
@@ -55,29 +52,26 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
         $help = array();
         $settings = array();
         $factory = array();
+        $storage = \Krexx::$storage;
 
         // Initialzing help data for the template.
-        $help['skin'] = htmlspecialchars(strip_tags(Help::getHelp('skin')));
-        $help['memoryLeft'] = htmlspecialchars(strip_tags(Help::getHelp('memoryLeft')));
-        $help['maxRuntime'] = htmlspecialchars(strip_tags(Help::getHelp('maxRuntime')));
-        $help['folder'] = htmlspecialchars(strip_tags(Help::getHelp('folder')));
-        $help['maxfiles'] = htmlspecialchars(strip_tags(Help::getHelp('maxfiles')));
-        $help['destination'] = htmlspecialchars(strip_tags(Help::getHelp('destination')));
-        $help['maxCall'] = htmlspecialchars(strip_tags(Help::getHelp('maxCall')));
+        $help['skin'] = htmlspecialchars(strip_tags($storage->messages->getHelp('skin')));
+        $help['iprange'] = htmlspecialchars(strip_tags($storage->messages->getHelp('iprange')));
+        $help['maxfiles'] = htmlspecialchars(strip_tags($storage->messages->getHelp('maxfiles')));
+        $help['destination'] = htmlspecialchars(strip_tags($storage->messages->getHelp('destination')));
+        $help['maxCall'] = htmlspecialchars(strip_tags($storage->messages->getHelp('maxCall')));
         $help['disabled'] = 'Here you can disable kreXX without uninstalling the whole module.';
-        $help['detectAjax'] = htmlspecialchars(strip_tags(Help::getHelp('detectAjax')));
-        $help['analyseProtected'] = htmlspecialchars(strip_tags(Help::getHelp('analyseProtected')));
-        $help['analysePrivate'] = htmlspecialchars(strip_tags(Help::getHelp('analysePrivate')));
-        $help['analyseTraversable'] = htmlspecialchars(strip_tags(Help::getHelp('analyseTraversable')));
+        $help['detectAjax'] = htmlspecialchars(strip_tags($storage->messages->getHelp('detectAjax')));
+        $help['analyseProtected'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseProtected')));
+        $help['analysePrivate'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analysePrivate')));
+        $help['analyseTraversable'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseTraversable')));
         $help['debugMethods'] = 'Comma-separated list of used debug callback functions. kreXX will try to call them,' .
             "if they are available and display their provided data.\nWe Recommend for Magento: '__toArray,toString'";
-        $help['level'] = htmlspecialchars(strip_tags(Help::getHelp('level')));
-        $help['analyseMethodsAtall'] = htmlspecialchars(strip_tags(Help::getHelp('analyseMethodsAtall')));
-        $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags(Help::getHelp('analyseProtectedMethods')));
-        $help['analysePrivateMethods'] = htmlspecialchars(strip_tags(Help::getHelp('analysePrivateMethods')));
-        $help['registerAutomatically'] = htmlspecialchars(strip_tags(Help::getHelp('registerAutomatically')));
-        $help['backtraceAnalysis'] = htmlspecialchars(strip_tags(Help::getHelp('backtraceAnalysis')));
-        $help['analyseConstants'] = htmlspecialchars(strip_tags(Help::getHelp('analyseConstants')));
+        $help['level'] = htmlspecialchars(strip_tags($storage->messages->getHelp('level')));
+        $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseProtectedMethods')));
+        $help['analysePrivateMethods'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analysePrivateMethods')));
+        $help['registerAutomatically'] = htmlspecialchars(strip_tags($storage->messages->getHelp('registerAutomatically')));
+        $help['analyseConstants'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseConstants')));
         $this->assign('help', $help);
 
         // Initializing the select data for the template.
@@ -91,90 +85,75 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
             'deep' => 'deep'
         ));
         $skins = array();
-        foreach (\Brainworxx\Krexx\View\Render::getSkinList() as $skin) {
+
+        foreach ($storage->render->getSkinList() as $skin) {
             $skins[$skin] = $skin;
         }
 
         // Get all values from the configuration file.
-        $settings['output']['skin'] = Config::getConfigFromFile(
+        $settings['output']['skin'] = $storage->config->getConfigFromFile(
             'output',
             'skin'
         );
-        $settings['runtime']['memoryLeft'] = Config::getConfigFromFile(
-            'runtime',
-            'memoryLeft'
-        );
-        $settings['runtime']['maxRuntime'] = Config::getConfigFromFile(
-            'runtime',
-            'maxRuntime'
-        );
-        $settings['output']['folder'] = Config::getConfigFromFile(
-            'output',
-            'folder'
-        );
-        $settings['output']['maxfiles'] = Config::getConfigFromFile(
+        $settings['output']['maxfiles'] = $storage->config->getConfigFromFile(
             'output',
             'maxfiles'
         );
-        $settings['output']['destination'] = Config::getConfigFromFile(
+        $settings['output']['destination'] = $storage->config->getConfigFromFile(
             'output',
             'destination'
         );
-        $settings['runtime']['maxCall'] = Config::getConfigFromFile(
+        $settings['runtime']['maxCall'] = $storage->config->getConfigFromFile(
             'runtime',
             'maxCall'
         );
-        $settings['runtime']['disabled'] = Config::getConfigFromFile(
+        $settings['runtime']['disabled'] = $storage->config->getConfigFromFile(
             'runtime',
             'disabled'
         );
-        $settings['runtime']['detectAjax'] = Config::getConfigFromFile(
+        $settings['runtime']['iprange'] = $storage->config->getConfigFromFile(
+            'runtime',
+            'iprange'
+        );
+        $settings['runtime']['detectAjax'] = $storage->config->getConfigFromFile(
             'runtime',
             'detectAjax'
         );
-        $settings['properties']['analyseProtected'] = Config::getConfigFromFile(
+        $settings['properties']['analyseProtected'] = $storage->config->getConfigFromFile(
             'properties',
             'analyseProtected'
         );
-        $settings['properties']['analysePrivate'] = Config::getConfigFromFile(
+        $settings['properties']['analysePrivate'] = $storage->config->getConfigFromFile(
             'properties',
             'analysePrivate'
         );
-        $settings['properties']['analyseConstants'] = Config::getConfigFromFile(
+        $settings['properties']['analyseConstants'] = $storage->config->getConfigFromFile(
             'properties',
             'analyseConstants'
         );
-        $settings['properties']['analyseTraversable'] = Config::getConfigFromFile(
+        $settings['properties']['analyseTraversable'] = $storage->config->getConfigFromFile(
             'properties',
             'analyseTraversable'
         );
-        $settings['methods']['debugMethods'] = Config::getConfigFromFile(
+        $settings['methods']['debugMethods'] = $storage->config->getConfigFromFile(
             'methods',
             'debugMethods'
         );
-        $settings['runtime']['level'] = Config::getConfigFromFile(
+        $settings['runtime']['level'] = $storage->config->getConfigFromFile(
             'runtime',
             'level'
         );
-        $settings['methods']['analyseMethodsAtall'] = Config::getConfigFromFile(
-            'methods',
-            'analyseMethodsAtall'
-        );
-        $settings['methods']['analyseProtectedMethods'] = Config::getConfigFromFile(
+        $settings['methods']['analyseProtectedMethods'] = $storage->config->getConfigFromFile(
             'methods',
             'analyseProtectedMethods'
         );
-        $settings['methods']['analysePrivateMethods'] = Config::getConfigFromFile(
+        $settings['methods']['analysePrivateMethods'] = $storage->config->getConfigFromFile(
             'methods',
             'analysePrivateMethods'
         );
-        $settings['backtraceAndError']['registerAutomatically'] = Config::getConfigFromFile(
+        $settings['backtraceAndError']['registerAutomatically'] = $storage->config->getConfigFromFile(
             'backtraceAndError',
             'registerAutomatically'
-        );
-        $settings['backtraceAndError']['backtraceAnalysis'] = Config::getConfigFromFile(
-            'backtraceAndError',
-            'backtraceAnalysis'
         );
 
         // Are these actually set?
@@ -183,7 +162,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
                 if (is_null($config)) {
                     $factory[$attribute] = ' checked="checked" ';
                     // We need to fill these values with the stuff from the factory settings!
-                    $settings[$mainkey][$attribute] = Config::$configFallback[$mainkey][$attribute];
+                    $settings[$mainkey][$attribute] = $storage->config->configFallback[$mainkey][$attribute];
                 } else {
                     $factory[$attribute] = '';
                 }

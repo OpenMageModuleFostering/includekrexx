@@ -1,19 +1,20 @@
 <?php
 /**
- * @file
- *   Empty magento helperclass kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -34,18 +35,23 @@
 use Brainworxx\Krexx\View\Messages;
 
 /**
- * Class Brainworxx_Includekrexx_Helper_Data
+ * Helper class for kreXX. Relays messages from kreXX to the magento
+ * messaging system.
  */
-class Brainworxx_Includekrexx_Helper_Data extends Mage_Core_Helper_Abstract {
+class Brainworxx_Includekrexx_Helper_Data extends Mage_Core_Helper_Abstract
+{
 
     public function relayMessages()
     {
         // Has kreXX something to say? Maybe a writeprotected logfolder?
-        // We are only faciong error messages here, normally.
-        $messages = strip_tags(Messages::outputMessages());
+        // We are only facing error messages here, normally.
+        $messages = strip_tags(Krexx::$storage->messages->outputMessages());
 
         if (!empty($messages)) {
-            Mage::getSingleton('core/session')->addError(strip_tags(Messages::outputMessages()), 'Message from kreXX:');
+            Mage::getSingleton('core/session')->addError(
+                strip_tags($messages),
+                'Message from kreXX:'
+            );
         }
     }
 }

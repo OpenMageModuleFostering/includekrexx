@@ -1,20 +1,20 @@
 <?php
-
 /**
- * @file
- *   Magento backend block for kreXX
- *   kreXX: Krumo eXXtended
+ * kreXX: Krumo eXXtended
  *
- *   This is a debugging tool, which displays structured information
- *   about any PHP object. It is a nice replacement for print_r() or var_dump()
- *   which are used by a lot of PHP developers.
+ * kreXX is a debugging tool, which displays structured information
+ * about any PHP object. It is a nice replacement for print_r() or var_dump()
+ * which are used by a lot of PHP developers.
  *
- *   kreXX is a fork of Krumo, which was originally written by:
- *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * kreXX is a fork of Krumo, which was originally written by:
+ * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
  *
- * @author brainworXX GmbH <info@brainworxx.de>
+ * @author
+ *   brainworXX GmbH <info@brainworxx.de>
  *
- * @license http://opensource.org/licenses/LGPL-2.1
+ * @license
+ *   http://opensource.org/licenses/LGPL-2.1
+ *
  *   GNU Lesser General Public License Version 2.1
  *
  *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
@@ -32,10 +32,8 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-use \Brainworxx\Krexx\Framework\Config;
-
 /**
- * Class Brainworxx_Includekrexx_Block_Adminhtml_Log
+ * Block for the backend lgfile access.
  */
 class Brainworxx_Includekrexx_Block_Adminhtml_Log extends Mage_Adminhtml_Block_Template
 {
@@ -47,13 +45,21 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Log extends Mage_Adminhtml_Block_T
     public function _construct()
     {
         parent::_construct();
+        $storage = \Krexx::$storage;
 
         // 1. Get the log folder.
-        $dir = Config::$krexxdir . Config::getConfigValue('output', 'folder') . DIRECTORY_SEPARATOR;
+        $dir = $storage->config->krexxdir . 'log' . DIRECTORY_SEPARATOR;
 
         // 2. Get the file list and sort it.
         // Meh, Varien_Io_File does not allow a filter or sorting.
         $files = glob($dir . '*.Krexx.html');
+
+        // When we have no files, we stop right here.
+        if (empty($files)) {
+            $this->assign('files', array());
+            return;
+        }
+
         // The function filemtime gets cached by php btw.
         usort($files, function ($a, $b) {
             return filemtime($b) - filemtime($a);
