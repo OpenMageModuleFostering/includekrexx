@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "GNU-Lesser-General-Public-License-Version-2.1",
     "homepage": "",
-    "description": "Wrapper module for kreXX with a settings editor in the backend.",
+    "description": "Backend module for kreXX with a settings editor and logfile access..",
     "authors": [
     {
         "name": "Brainworxx GmbH",

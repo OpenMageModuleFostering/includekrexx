@@ -34,245 +34,277 @@
 namespace Brainworxx\Krexx\View;
 
 use Brainworxx\Krexx\Framework\Config;
-use Brainworxx\Krexx\Analysis;
-use Brainworxx\Krexx\Framework\Chunks;
 use Brainworxx\Krexx\Framework\Toolbox;
+use Brainworxx\Krexx\Analysis\Objects\Objects;
+use Brainworxx\Krexx\Analysis\Variables;
 
 /**
  * This class hosts the code generation functions.
  *
- * @package Krexx
+ * @package Brainworxx\Krexx\View
  */
-class Output {
+class Output
+{
 
-  public static $headerSend = FALSE;
+    public static $headerSend = false;
 
-  /**
-   * Outputs a string, either to the browser or file.
-   *
-   * Wrapper for sendOutputToBrowser() and saveOutputToFile()
-   *
-   * @param string $string
-   *   The generated DOM so far, for the output.
-   * @param bool $ignore_local_settings
-   *   Are we ignoring local settings?
-   */
-  public static function outputNow($string, $ignore_local_settings = FALSE) {
-    if (Config::getConfigValue('output', 'destination', $ignore_local_settings) == 'file') {
-      // Save it to a file.
-      Chunks::saveDechunkedToFile($string);
+    /**
+     * Simply outputs the Header of kreXX.
+     *
+     * @param string $headline
+     *   The headline, displayed in the header.
+     *
+     * @return string
+     *   The generated markup
+     */
+    public static function outputHeader($headline)
+    {
+
+        // Do we do an output as file?
+        if (!self::$headerSend) {
+            // Send doctype and css/js only once.
+            self::$headerSend = true;
+            return SkinRender::renderHeader('<!DOCTYPE html>', $headline, self::outputCssAndJs());
+        } else {
+            return SkinRender::renderHeader('', $headline, '');
+        }
     }
-    else {
-      // Send it to the browser.
-      Chunks::sendDechunkedToBrowser($string);
-    }
-  }
 
-  /**
-   * Simply outputs the Header of kreXX.
-   *
-   * @param string $headline
-   *   The headline, displayed in the header.
-   * @param bool $ignore_local_settings
-   *   Are we ignoring local cookie settings? Should only be
-   *   TRUE when we render the settings menu only.
-   *
-   * @return string
-   *   The generated markup
-   */
-  public static function outputHeader($headline, $ignore_local_settings = FALSE) {
+    /**
+     * Simply renders the footer and output current settings.
+     *
+     * @param array $caller
+     *   Where was kreXX initially invoked from.
+     * @param bool $isExpanded
+     *   Are we rendering an expanded footer?
+     *   TRUE when we render the settings menu only.
+     *
+     * @return string
+     *   The generated markup.
+     */
+    public static function outputFooter($caller, $isExpanded = false)
+    {
+        // Wrap an expandable around to save space.
+        $anonFunction = function ($params) {
+            $config = $params[0];
+            $source = $params[1];
+            $configOutput = '';
+            foreach ($config as $sectionName => $sectionData) {
+                $paramsExpandable = array(
+                    $sectionData,
+                    $source[$sectionName]
+                );
 
-    // Do we do an output as file?
-    $output_as_file = (Config::getConfigValue('output', 'destination') == 'file');
-    // When we have a normal file output, and ignore the local settings,
-    // it means we are currently rendering the frontend "Edit local settings"
-    // mask but outputting the rest into a file.
-    // We need to render the CSS/JS for the frontend, because we have dual
-    // output (frontend and file).
-    $dual_output = ($output_as_file && $ignore_local_settings);
+                // Render a whole section.
+                $anonFunction = function ($params) {
+                    $sectionData = $params[0];
+                    $source = $params[1];
+                    $sectionOutput = '';
+                    foreach ($sectionData as $parameterName => $parameterValue) {
+                        // Render the single value.
+                        // We need to find out where the value comes from.
+                        $config = Config::getFeConfig($parameterName);
+                        $editable = $config[0];
+                        $type = $config[1];
 
-    if (!self::$headerSend || $dual_output == TRUE) {
-      // Send doctype and css/js only once.
-      self::$headerSend = TRUE;
-      return SkinRender::renderHeader('<!DOCTYPE html>', $headline, self::outputCssAndJs());
-    }
-    else {
-      return SkinRender::renderHeader('', $headline, '');
-    }
-  }
-
-  /**
-   * Simply renders the footer and output current settings.
-   *
-   * @param array $caller
-   *   Where was kreXX initially invoked from.
-   * @param bool $is_expanded
-   *   Are we rendering an expanded footer?
-   *   TRUE when we render the settings menu only.
-   *
-   * @return string
-   *   The generated markup.
-   */
-  public static function outputFooter($caller, $is_expanded = FALSE) {
-    // Wrap an expandable around to save space.
-    $anon_function = function ($params) {
-      $config = $params[0];
-      $source = $params[1];
-      $config_output = '';
-      foreach ($config as $section_name => $section_data) {
-        $params_expandable = array(
-          $section_data,
-          $source[$section_name]);
-
-        // Render a whole section.
-        $anonfunction = function ($params) {
-          // $section_name = $params[0];
-          $section_data = $params[0];
-          $source = $params[1];
-          $section_output = '';
-          foreach ($section_data as $parameter_name => $parameter_value) {
-            // Render the single value.
-            // We need to find out where the value comes from.
-            $config = Config::getFeConfig($parameter_name);
-            $editable = $config[0];
-            $type = $config[1];
-
-            if ($type != 'None') {
-              if ($editable) {
-                $section_output .= SkinRender::renderSingleEditableChild($parameter_name, htmlspecialchars($parameter_value), $source[$parameter_name], $type, $parameter_name);
-              }
-              else {
-                $section_output .= SkinRender::renderSingleChild($parameter_value, $parameter_name, htmlspecialchars($parameter_value), FALSE, $source[$parameter_name], '', $parameter_name, '', '=>', TRUE);
-              }
+                        if ($type != 'None') {
+                            if ($editable) {
+                                $sectionOutput .= SkinRender::renderSingleEditableChild(
+                                    $parameterName,
+                                    htmlspecialchars($parameterValue),
+                                    $source[$parameterName],
+                                    $type,
+                                    $parameterName
+                                );
+                            } else {
+                                $sectionOutput .= SkinRender::renderSingleChild(
+                                    $parameterValue,
+                                    $parameterName,
+                                    htmlspecialchars($parameterValue),
+                                    $source[$parameterName],
+                                    $parameterName
+                                );
+                            }
+                        }
+                    }
+                    return $sectionOutput;
+                };
+                $configOutput .= SkinRender::renderExpandableChild(
+                    $sectionName,
+                    'Config',
+                    $anonFunction,
+                    $paramsExpandable,
+                    '. . .'
+                );
             }
-          }
-          return $section_output;
+            // Render the dev-handle field.
+            $configOutput .= SkinRender::renderSingleEditableChild(
+                'Local open function',
+                Config::getDevHandler(),
+                '\krexx::',
+                'Input',
+                'localFunction'
+            );
+            // Render the reset-button which will delete the debug-cookie.
+            $configOutput .= SkinRender::renderButton('resetbutton', 'Reset local settings', 'resetbutton');
+            return $configOutput;
         };
-        $config_output .= SkinRender::renderExpandableChild($section_name, 'Config', $anonfunction, $params_expandable, '. . .');
-      }
-      // Render the dev-handle field.
-      $config_output .= SkinRender::renderSingleEditableChild('Local open function', Config::getDevHandler(), '\krexx::', 'Input', 'localFunction');
-      // Render the reset-button which will delete the debug-cookie.
-      $config_output .= SkinRender::renderButton('resetbutton', 'Reset local settings', 'resetbutton');
-      return $config_output;
-    };
 
-    // Now we need to stitch together the content of the ini file
-    // as well as it's path.
-    if (!is_readable(Config::getPathToIni())) {
-      // Project settings are not accessible
-      // tell the user, that we are using fallback settings.
-      $path = 'Krexx.ini not found, using factory settings';
-      // $config = array();
-    }
-    else {
-      $path = 'Current configuration';
-    }
+        // Now we need to stitch together the content of the ini file
+        // as well as it's path.
+        if (!is_readable(Config::getPathToIni())) {
+            // Project settings are not accessible
+            // tell the user, that we are using fallback settings.
+            $path = 'Krexx.ini not found, using factory settings';
+            // $config = array();
+        } else {
+            $path = 'Current configuration';
+        }
 
-    $my_config = Config::getWholeConfiguration();
-    $source = $my_config[0];
-    $config = $my_config[1];
+        $wholeConfig = Config::getWholeConfiguration();
+        $source = $wholeConfig[0];
+        $config = $wholeConfig[1];
 
-    $parameter = array($config, $source);
+        $parameter = array($config, $source);
 
-    $config_output = SkinRender::renderExpandableChild($path, Config::getPathToIni(), $anon_function, $parameter, '', '', 'currentSettings', $is_expanded);
-    return SkinRender::renderFooter($caller, $config_output, $is_expanded);
-  }
-
-  /**
-   * Outputs the CSS and JS.
-   *
-   * @return string
-   *   The generated markup.
-   */
-  public Static Function outputCssAndJs() {
-    // Get the css file.
-    $css = Toolbox::getFileContents(Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/skin.css');
-    // Remove whitespace.
-    $css = preg_replace('/\s+/', ' ', $css);
-
-    // Adding our DOM tools to the js.
-    if (is_readable(Config::$krexxdir . 'resources/jsLibs/kdt.min.js')) {
-      $js = Toolbox::getFileContents(Config::$krexxdir . 'resources/jsLibs/kdt.min.js');
-    }
-    else {
-      $js = Toolbox::getFileContents(Config::$krexxdir . 'resources/jsLibs/kdt.js');
+        $configOutput = SkinRender::renderExpandableChild(
+            $path,
+            Config::getPathToIni(),
+            $anonFunction,
+            $parameter,
+            '',
+            '',
+            'currentSettings',
+            $isExpanded
+        );
+        return SkinRender::renderFooter($caller, $configOutput, $isExpanded);
     }
 
-    // Krexx.js is comes directly form the template.
-    if (is_readable(Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/krexx.min.js')) {
-      $js .= Toolbox::getFileContents(Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/krexx.min.js');
+    /**
+     * Outputs the CSS and JS.
+     *
+     * @return string
+     *   The generated markup.
+     */
+    public static function outputCssAndJs()
+    {
+        // Get the css file.
+        $css = Toolbox::getFileContents(Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/skin.css');
+        // Remove whitespace.
+        $css = preg_replace('/\s+/', ' ', $css);
+
+        // Adding our DOM tools to the js.
+        if (is_readable(Config::$krexxdir . 'resources/jsLibs/kdt.min.js')) {
+            $jsFile = Config::$krexxdir . 'resources/jsLibs/kdt.min.js';
+        } else {
+            $jsFile = Config::$krexxdir . 'resources/jsLibs/kdt.js';
+        }
+        $js = Toolbox::getFileContents($jsFile);
+
+        // Krexx.js is comes directly form the template.
+        if (is_readable(Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/krexx.min.js')) {
+            $jsFile = Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/krexx.min.js';
+        } else {
+            $jsFile = Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/krexx.js';
+        }
+        $js .= Toolbox::getFileContents($jsFile);
+
+        return SkinRender::renderCssJs($css, $js);
     }
-    else {
-      $js .= Toolbox::getFileContents(Config::$krexxdir . 'resources/skins/' . SkinRender::$skin . '/krexx.js');
-    }
 
-
-    return SkinRender::renderCssJs($css, $js);
-  }
-
-  /**
-   * Outputs a backtrace.
-   *
-   * We need to format this one a little bit different than a
-   * normal array.
-   *
-   * @param array $backtrace
-   *   The backtrace.
-   *
-   * @return string
-   *   The rendered backtrace.
-   */
-  public static function outputBacktrace(array $backtrace) {
-    $output = '';
-
-    // Add the sourcecode to our backtrace.
-    $backtrace = Toolbox::addSourcecodeToBacktrace($backtrace);
-
-    foreach ($backtrace as $step => $step_data) {
-      $name = $step;
-      $type = 'Stack Frame';
-      $parameter = $step_data;
-      $anon_function = function($parameter){
+    /**
+     * Outputs a backtrace.
+     *
+     * We need to format this one a little bit different than a
+     * normal array.
+     *
+     * @param array $backtrace
+     *   The backtrace.
+     *
+     * @return string
+     *   The rendered backtrace.
+     */
+    public static function outputBacktrace(array $backtrace)
+    {
         $output = '';
-        // We are handling the following values here:
-        // file, line, function, object, type, args, sourcecode.
-        $step_data = $parameter;
-        // File.
-        if (isset($step_data['file'])) {
-          $output .= SkinRender::renderSingleChild($step_data['file'], 'File', $step_data['file'], 'string ' . strlen($step_data['file']));
-        }
-        // Line.
-        if (isset($step_data['line'])) {
-          $output .= SkinRender::renderSingleChild($step_data['line'], 'Line no.', $step_data['line'], 'integer');
-        }
-        // Sourcecode, is escaped by now.
-        if (isset($step_data['sourcecode'])) {
-          $output .= SkinRender::renderSingleChild($step_data['sourcecode'], 'Sourcecode', '. . .', 'PHP');
-        }
-        // Function.
-        if (isset($step_data['function'])) {
-          $output .= SkinRender::renderSingleChild($step_data['function'], 'Last called function', $step_data['function'], 'string ' . strlen($step_data['function']));
-        }
-        // Object.
-        if (isset($step_data['object'])) {
-          $output .= Analysis\Objects::analyseObject($step_data['object'], 'Calling object');
-        }
-        // Type.
-        if (isset($step_data['type'])) {
-          $output .= SkinRender::renderSingleChild($step_data['type'], 'Call type', $step_data['type'], 'string ' . strlen($step_data['type']));
-        }
-        // Args.
-        if (isset($step_data['args'])) {
-          $output .= Analysis\Variables::analyseArray($step_data['args'], 'Arguments from the call');
+
+        // Add the sourcecode to our backtrace.
+        $backtrace = Toolbox::addSourcecodeToBacktrace($backtrace);
+
+        foreach ($backtrace as $step => $stepData) {
+            $name = $step;
+            $type = 'Stack Frame';
+            $parameter = $stepData;
+            $anonFunction = function ($parameter) {
+                $output = '';
+                // We are handling the following values here:
+                // file, line, function, object, type, args, sourcecode.
+                $stepData = $parameter;
+                // File.
+                if (isset($stepData['file'])) {
+                    $output .= SkinRender::renderSingleChild(
+                        $stepData['file'],
+                        'File',
+                        $stepData['file'],
+                        'string ' . strlen($stepData['file'])
+                    );
+                }
+                // Line.
+                if (isset($stepData['line'])) {
+                    $output .= SkinRender::renderSingleChild(
+                        $stepData['line'],
+                        'Line no.',
+                        $stepData['line'],
+                        'integer'
+                    );
+                }
+                // Sourcecode, is escaped by now.
+                if (isset($stepData['sourcecode'])) {
+                    $output .= SkinRender::renderSingleChild(
+                        $stepData['sourcecode'],
+                        'Sourcecode',
+                        '. . .',
+                        'PHP'
+                    );
+                }
+                // Function.
+                if (isset($stepData['function'])) {
+                    $output .= SkinRender::renderSingleChild(
+                        $stepData['function'],
+                        'Last called function',
+                        $stepData['function'],
+                        'string ' . strlen($stepData['function'])
+                    );
+                }
+                // Object.
+                if (isset($stepData['object'])) {
+                    $output .= Objects::analyseObject(
+                        $stepData['object'],
+                        'Calling object'
+                    );
+                }
+                // Type.
+                if (isset($stepData['type'])) {
+                    $output .= SkinRender::renderSingleChild(
+                        $stepData['type'],
+                        'Call type',
+                        $stepData['type'],
+                        'string ' . strlen($stepData['type'])
+                    );
+                }
+                // Args.
+                if (isset($stepData['args'])) {
+                    $output .= Variables::analyseArray(
+                        $stepData['args'],
+                        'Arguments from the call'
+                    );
+                }
+
+                return $output;
+            };
+            $output .= SkinRender::renderExpandableChild($name, $type, $anonFunction, $parameter);
         }
 
         return $output;
-      };
-      $output .= SkinRender::renderExpandableChild($name, $type, $anon_function, $parameter);
     }
-
-    return $output;
-  }
-
 }

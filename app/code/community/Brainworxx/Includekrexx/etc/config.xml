@@ -2,10 +2,10 @@
 <config>
   <modules>
     <Brainworxx_Includekrexx>
-      <version>1.4.0</version>
+      <version>1.4.2</version>
     </Brainworxx_Includekrexx>
   </modules>
-  
+
   <admin>
     <routers>
       <adminhtml>
@@ -17,20 +17,20 @@
       </adminhtml>
     </routers>
   </admin>
-  
+
   <global>
     <blocks>
       <includekrexx>
         <class>Brainworxx_Includekrexx_Block</class>
       </includekrexx>
     </blocks>
-    
+
     <helpers>
       <includekrexx>
         <class>Brainworxx_Includekrexx_Helper</class>
       </includekrexx>
     </helpers>
-    
+
     <events>
       <controller_front_init_before>
         <observers>
@@ -41,7 +41,7 @@
           </brainworxx_includekrexx>
         </observers>
       </controller_front_init_before>
-      
+
       <resource_get_tablename>
         <observers>
           <brainworxx_includekrexx>
@@ -53,7 +53,7 @@
       </resource_get_tablename>
     </events>
   </global>
-  
+
   <adminhtml>
     <layout>
       <updates>

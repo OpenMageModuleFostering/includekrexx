@@ -25,4 +25,9 @@
     </reference>
   </adminhtml_krexx_feconfig>
 
+  <adminhtml_krexxlog_index>
+    <reference name="content">
+      <block type="includekrexx/adminhtml_log" name="krexxlog" template="includekrexx/krexxlog.phtml"/>
+    </reference>
+  </adminhtml_krexxlog_index>
 </layout>

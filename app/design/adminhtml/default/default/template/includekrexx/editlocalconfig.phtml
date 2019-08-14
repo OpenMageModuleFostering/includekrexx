@@ -16,7 +16,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -30,17 +30,25 @@
  *   along with this library; if not, write to the Free Software Foundation,
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+use Brainworxx\Krexx\Framework\Config;
+
 krexx::editSettings();
 ?>
 <h1>Edit local browser settings</h1>
-<?php if (!\Brainworxx\Krexx\Framework\Config::isEnabled(NULL, TRUE)) { ?>
-  Normally, we would display the menu for the local browser settings here. This menu is a part of the kreXX output and located in the footer.
-  <br/>
-  The output of kreXX was disabled, so it will not be displayed.
-
+<?php if (!Config::isEnabled(null)) { ?>
+    Normally, we would display the menu for the local browser settings here.
+    <br/>
+    The output of kreXX was <b>disabled</b>, so it will not be displayed.
 <?php } else { ?>
-  Here you can edit the local browser settings. They are stored in a cookie, and only affect your current browser. Unlike the configuration file, not all settings can be edited here by default. This can be changed in the
-  <i>Edit FE configuration</i> menu. Local browser settings overwrite configuration file settings.
-  <br/><br/>
-  <b>Please note, that these settings only affect your current browser!</b>
+    <?php if (Config::getConfigValue('output', 'destination') == 'file') { ?>
+        Normally, we would display the menu for the local browser settings here.
+        <br/>
+        The output of kreXX is switched to <b>file</b>, so it will not be displayed.
+
+    <?php } else { ?>
+        Here you can edit the local browser settings. They are stored in a cookie, and only affect your current browser. Unlike the configuration file, not all settings can be edited here by default. This can be changed in the
+        <i>Edit FE configuration</i> menu. Local browser settings overwrite configuration file settings.
+        <br/><br/>
+        <b>Please note, that these settings only affect your current browser!</b>
+    <?php } ?>
 <?php } ?>

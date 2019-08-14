@@ -1,3 +1,34 @@
+1.4.2
+- Added analysis metadata to the file output.
+- Change: Restructured the configuration options. The sorting does now
+  make more sense than before.
+- Change: The logging options can never be changed on the frontend.
+- Change: The debug methods can never be changed on the frontend.
+- Bufix / Change: Removed the whole dual-output mess.
+- Change: When the destination is set to 'file' via config file, this
+  value can not be overwritten with local cookie settings.
+- Change: Unclunked the Smokey-Grey skin.
+- Change: Adopted PSR-2
+- Bugfix: No helptext displayed for readonly cookie config.
+- Bugfix: The Hans skin renders the config option name twice.
+- Bugfix: When setting the logfiles to '10', kreXX will now keep 10
+  files, and not 9.
+- Bugfix: The debug output might jump around, in some special css
+  environments.
+- Bufix: Proper handling of broken html output from the hosting CMS.
+
+1.4.1
+- Added class constants analysis.
+- Added the possibility to remove message keys from the message class
+- Change: Search is now case-insensitive. This should make searching
+  much more easy.
+- Change: Output destination can not be changed anymore via the cookie
+  editor by default. This should prevent people from locking themselves
+  out.
+- Cleanup: Cleaned up the object analysis as well as the namespace
+  usage.
+- Bugfix: Removed hardcoded logfolder path in the bootstrap phase.
+
 1.4.0
 - Added smoky-grey as the new standard skin.
 - Added some primary formatting to the Hans skin to prevent the host
@@ -173,7 +204,7 @@
 - All settings are now editable. Added a function to display
   kreXX, despite some local settings to prevent a lockout.
 - Added support for mixed encoding in string analysis.
-- Moved getDebugCookie functionality to the local settings. 
+- Moved getDebugCookie functionality to the local settings.
 - Bugfix: keXX should now use the included jQuery version, in
   case that there are other versions included.
 

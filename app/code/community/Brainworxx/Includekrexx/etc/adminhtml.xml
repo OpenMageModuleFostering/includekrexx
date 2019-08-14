@@ -8,23 +8,32 @@
           <sort_order>15</sort_order>
           <children>
             <edit translate="title" module="includekrexx">
-              <title>Edit kreXX config</title>
+              <title>Edit configuration file</title>
               <sort_order>5</sort_order>
               <action>adminhtml/krexx/config</action>
             </edit>
-            <editlocalconfig translate="title" module="includekrexx">
-              <title>Edit local browser settings</title>
-              <sort_order>10</sort_order>
-              <action>adminhtml/krexx/editlocalconfig</action>
-            </editlocalconfig>
+
             <editfe translate="title" module="includekrexx">
-              <title>Administer FE editing</title>
-              <sort_order>15</sort_order>
+              <title>Edit FE configuration</title>
+              <sort_order>10</sort_order>
               <action>adminhtml/krexx/feconfig</action>
             </editfe>
+
+            <krexxlog translate="title" module="includekrexx">
+              <title>Access logfiles</title>
+              <sort_order>15</sort_order>
+               <action>adminhtml/krexxlog/index</action>
+            </krexxlog>
+
+            <editlocalconfig translate="title" module="includekrexx">
+              <title>Edit local cookie settings</title>
+              <sort_order>20</sort_order>
+              <action>adminhtml/krexx/editlocalconfig</action>
+            </editlocalconfig>
+
             <docu translate="title" module="includekrexx">
               <title>kreXX quick docu</title>
-              <sort_order>20</sort_order>
+              <sort_order>25</sort_order>
               <action>adminhtml/krexx/docu</action>
             </docu>
           </children>
@@ -39,17 +48,24 @@
           <system>
             <children>
               <krexx>
-              <title>kreXX</title>
+                <title>kreXX</title>
                 <children>
                   <edit>
-                    <title>Edit kreXX Config</title>
+                    <title>Edit configuration file</title>
                   </edit>
+
                   <editfe>
-                    <title>Administer kreXX FE Editing</title>
+                    <title>Edit FE configuration</title>
                   </editfe>
+
+                  <krexxlog>
+                    <title>Access logfiles</title>
+                  </krexxlog>
+
                   <editlocalconfig>
-                    <title>Edit local browser settings</title>
+                    <title>Edit local cookie settings</title>
                   </editlocalconfig>
+
                   <docu>
                     <title>kreXX quick docu</title>
                   </docu>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  *   Magento backend block for kreXX
@@ -16,7 +17,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -31,102 +32,181 @@
  *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml_Block_Template {
+use Brainworxx\Krexx\View\Help;
+use Brainworxx\Krexx\Framework\Config;
+use Brainworxx\Krexx\View\Messages;
+
+/**
+ * Class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config
+ */
+class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml_Block_Template
+{
 
 
-  /**
-   * Assign the values to the template file.
-   *
-   * @see Mage_Core_Block_Template::_construct()
-   */
-  public function _construct() {
-    parent::_construct();
+    /**
+     * Assign the values to the template file.
+     *
+     * @see Mage_Core_Block_Template::_construct()
+     */
+    public function _construct()
+    {
+        parent::_construct();
 
-    $help = array();
-    $settings = array();
-    $factory = array();
+        $help = array();
+        $settings = array();
+        $factory = array();
 
-    // Initialzing help data for the template.
-    $help['skin'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('skin')));
-    $help['memoryLeft'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('memoryLeft')));
-    $help['maxRuntime'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('maxRuntime')));
-    $help['folder'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('folder')));
-    $help['maxfiles'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('maxfiles')));
-    $help['destination'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('destination')));
-    $help['maxCall'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('maxCall')));
-    $help['disabled'] = 'Here you can disable kreXX without uninstalling the whole module.';
-    $help['detectAjax'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('detectAjax')));
-    $help['analyseProtected'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseProtected')));
-    $help['analysePrivate'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePrivate')));
-    $help['analyseTraversable'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseTraversable')));
-    $help['debugMethods'] = "Comma-separated list of used debug callback functions. kreXX will try to call them, if they are available and display their provided data.\nWe Recommend for Magento: '__toArray,toString'";
-    $help['level'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('level')));
-    $help['analyseMethodsAtall'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseMethodsAtall')));
-    $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseProtectedMethods')));
-    $help['analysePrivateMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePrivateMethods')));
-    $help['registerAutomatically'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('registerAutomatically')));
-    $help['backtraceAnalysis'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('backtraceAnalysis')));
-    $this->assign('help', $help);
+        // Initialzing help data for the template.
+        $help['skin'] = htmlspecialchars(strip_tags(Help::getHelp('skin')));
+        $help['memoryLeft'] = htmlspecialchars(strip_tags(Help::getHelp('memoryLeft')));
+        $help['maxRuntime'] = htmlspecialchars(strip_tags(Help::getHelp('maxRuntime')));
+        $help['folder'] = htmlspecialchars(strip_tags(Help::getHelp('folder')));
+        $help['maxfiles'] = htmlspecialchars(strip_tags(Help::getHelp('maxfiles')));
+        $help['destination'] = htmlspecialchars(strip_tags(Help::getHelp('destination')));
+        $help['maxCall'] = htmlspecialchars(strip_tags(Help::getHelp('maxCall')));
+        $help['disabled'] = 'Here you can disable kreXX without uninstalling the whole module.';
+        $help['detectAjax'] = htmlspecialchars(strip_tags(Help::getHelp('detectAjax')));
+        $help['analyseProtected'] = htmlspecialchars(strip_tags(Help::getHelp('analyseProtected')));
+        $help['analysePrivate'] = htmlspecialchars(strip_tags(Help::getHelp('analysePrivate')));
+        $help['analyseTraversable'] = htmlspecialchars(strip_tags(Help::getHelp('analyseTraversable')));
+        $help['debugMethods'] = 'Comma-separated list of used debug callback functions. kreXX will try to call them,' .
+            "if they are available and display their provided data.\nWe Recommend for Magento: '__toArray,toString'";
+        $help['level'] = htmlspecialchars(strip_tags(Help::getHelp('level')));
+        $help['analyseMethodsAtall'] = htmlspecialchars(strip_tags(Help::getHelp('analyseMethodsAtall')));
+        $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags(Help::getHelp('analyseProtectedMethods')));
+        $help['analysePrivateMethods'] = htmlspecialchars(strip_tags(Help::getHelp('analysePrivateMethods')));
+        $help['registerAutomatically'] = htmlspecialchars(strip_tags(Help::getHelp('registerAutomatically')));
+        $help['backtraceAnalysis'] = htmlspecialchars(strip_tags(Help::getHelp('backtraceAnalysis')));
+        $help['analyseConstants'] = htmlspecialchars(strip_tags(Help::getHelp('analyseConstants')));
+        $this->assign('help', $help);
 
+        // Initializing the select data for the template.
+        $this->setSelectDestination(array(
+            'frontend' => 'frontend',
+            'file' => 'file'
+        ));
+        $this->setSelectBool(array('true' => 'true', 'false' => 'false'));
+        $this->setSelectBacktrace(array(
+            'normal' => 'normal',
+            'deep' => 'deep'
+        ));
+        $skins = array();
+        foreach (\Brainworxx\Krexx\View\Render::getSkinList() as $skin) {
+            $skins[$skin] = $skin;
+        }
 
-    // Initializing the select data for the template.
-    $this->setSelectDestination(array('frontend' => 'frontend', 'file' => 'file'));
-    $this->setSelectBool(array('true' => 'true', 'false' => 'false'));
-    $this->setSelectBacktrace(array('normal' => 'normal', 'deep' => 'deep'));
-    $skins = array();
-    foreach (\Brainworxx\Krexx\View\Render::getSkinList() as $skin) {
-      $skins[$skin] = $skin;
+        // Get all values from the configuration file.
+        $settings['output']['skin'] = Config::getConfigFromFile(
+            'output',
+            'skin'
+        );
+        $settings['runtime']['memoryLeft'] = Config::getConfigFromFile(
+            'runtime',
+            'memoryLeft'
+        );
+        $settings['runtime']['maxRuntime'] = Config::getConfigFromFile(
+            'runtime',
+            'maxRuntime'
+        );
+        $settings['output']['folder'] = Config::getConfigFromFile(
+            'output',
+            'folder'
+        );
+        $settings['output']['maxfiles'] = Config::getConfigFromFile(
+            'output',
+            'maxfiles'
+        );
+        $settings['output']['destination'] = Config::getConfigFromFile(
+            'output',
+            'destination'
+        );
+        $settings['runtime']['maxCall'] = Config::getConfigFromFile(
+            'runtime',
+            'maxCall'
+        );
+        $settings['runtime']['disabled'] = Config::getConfigFromFile(
+            'runtime',
+            'disabled'
+        );
+        $settings['runtime']['detectAjax'] = Config::getConfigFromFile(
+            'runtime',
+            'detectAjax'
+        );
+        $settings['properties']['analyseProtected'] = Config::getConfigFromFile(
+            'properties',
+            'analyseProtected'
+        );
+        $settings['properties']['analysePrivate'] = Config::getConfigFromFile(
+            'properties',
+            'analysePrivate'
+        );
+        $settings['properties']['analyseConstants'] = Config::getConfigFromFile(
+            'properties',
+            'analyseConstants'
+        );
+        $settings['properties']['analyseTraversable'] = Config::getConfigFromFile(
+            'properties',
+            'analyseTraversable'
+        );
+        $settings['methods']['debugMethods'] = Config::getConfigFromFile(
+            'methods',
+            'debugMethods'
+        );
+        $settings['runtime']['level'] = Config::getConfigFromFile(
+            'runtime',
+            'level'
+        );
+        $settings['methods']['analyseMethodsAtall'] = Config::getConfigFromFile(
+            'methods',
+            'analyseMethodsAtall'
+        );
+        $settings['methods']['analyseProtectedMethods'] = Config::getConfigFromFile(
+            'methods',
+            'analyseProtectedMethods'
+        );
+        $settings['methods']['analysePrivateMethods'] = Config::getConfigFromFile(
+            'methods',
+            'analysePrivateMethods'
+        );
+        $settings['backtraceAndError']['registerAutomatically'] = Config::getConfigFromFile(
+            'backtraceAndError',
+            'registerAutomatically'
+        );
+        $settings['backtraceAndError']['backtraceAnalysis'] = Config::getConfigFromFile(
+            'backtraceAndError',
+            'backtraceAnalysis'
+        );
+
+        // Are these actually set?
+        foreach ($settings as $mainkey => $setting) {
+            foreach ($setting as $attribute => $config) {
+                if (is_null($config)) {
+                    $factory[$attribute] = ' checked="checked" ';
+                    // We need to fill these values with the stuff from the factory settings!
+                    $settings[$mainkey][$attribute] = Config::$configFallback[$mainkey][$attribute];
+                } else {
+                    $factory[$attribute] = '';
+                }
+            }
+        }
+
+        // Add them to the template.
+        $this->assign('skins', $skins);
+        $this->assign('settings', $settings);
+        $this->assign('factory', $factory);
     }
 
-    // Get all values from the configuration file.
-    $settings['render']['skin'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('render', 'skin');
-    $settings['render']['memoryLeft'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('render', 'memoryLeft');
-    $settings['render']['maxRuntime'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('render', 'maxRuntime');
-    $settings['logging']['folder'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('logging', 'folder');
-    $settings['logging']['maxfiles'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('logging', 'maxfiles');
-    $settings['output']['destination'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'destination');
-    $settings['output']['maxCall'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'maxCall');
-    $settings['output']['disabled'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'disabled');
-    $settings['output']['detectAjax'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('output', 'detectAjax');
-    $settings['deep']['analyseProtected'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analyseProtected');
-    $settings['deep']['analysePrivate'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analysePrivate');
-    $settings['deep']['analyseTraversable'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analyseTraversable');
-    $settings['deep']['debugMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'debugMethods');
-    $settings['deep']['level'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'level');
-    $settings['methods']['analyseMethodsAtall'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analyseMethodsAtall');
-    $settings['methods']['analyseProtectedMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analyseProtectedMethods');
-    $settings['methods']['analysePrivateMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analysePrivateMethods');
-    $settings['errorHandling']['registerAutomatically'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('errorHandling', 'registerAutomatically');
-    $settings['errorHandling']['backtraceAnalysis'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('errorHandling', 'backtraceAnalysis');
-
-    // Are these actually set?
-    foreach ($settings as $mainkey => $setting) {
-      foreach ($setting as $attribute => $config) {
-        if (is_null($config)) {
-          $factory[$attribute] = ' checked="checked" ';
-          // We need to fill these values with the stuff from the factory settings!
-          $settings[$mainkey][$attribute] = \Brainworxx\Krexx\Framework\Config::$configFallback[$mainkey][$attribute];
-        }
-        else {
-          $factory[$attribute] = '';
-        }
-      }
+    /**
+     * Return save url for edit form
+     *
+     * @return string
+     *   The url where the form is saved.
+     */
+    public function getSaveUrl()
+    {
+        return $this->getUrl('*/*/saveconfig', array(
+            '_current' => true,
+            'back' => null
+        ));
     }
-
-    // Add them to the template.
-    $this->assign('skins', $skins);
-    $this->assign('settings', $settings);
-    $this->assign('factory', $factory);
-  }
-
-  /**
-   * Return save url for edit form
-   *
-   * @return string
-   *   The url where the form is saved.
-   */
-  public function getSaveUrl() {
-    return $this->getUrl('*/*/saveconfig', array('_current' => TRUE, 'back' => NULL));
-  }
-
 }

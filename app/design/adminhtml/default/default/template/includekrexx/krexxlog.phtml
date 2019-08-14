@@ -1,0 +1,129 @@
+<?php
+/**
+ * @file
+ *   Adminhtml configuration template for kreXX
+ *   kreXX: Krumo eXXtended
+ *
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
+ * @author brainworXX GmbH <info@brainworxx.de>
+ *
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
+ *
+ *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
+/* @var Brainworxx_Includekrexx_Block_Adminhtml_Log $this */
+
+$linkToConfig = Mage::helper("adminhtml")->getUrl("/krexx/config");
+$linkToDispatcher = Mage::helper("adminhtml")->getUrl("/krexxlog/getcontent");
+?>
+    <h1>Overview file logging</h1>
+    <p>
+        This is an overview of all logfiles that kreXX has created. You can
+        easily access them here, just by clicking the filename.<br/>
+        You can activate file logging on the configuration page found here: <a
+            href="<?php echo $linkToConfig ?>">Edit configuration file</a>
+    </p>
+    <br/><br/>
+<?php if (empty($files)) { ?>
+    <p>Sorry, there are currently no logfiles.</p>
+<?php } else { ?>
+
+    <div class="grid">
+        <div class="hor-scroll">
+            <table class="data" cellspacing="0">
+                <colgroup>
+                    <col class="a-left" width="250">
+                    <col class="a-left" width="150">
+                    <col class="a-left" width="75">
+                    <col class="a-left">
+                </colgroup>
+                <thead>
+                <tr class="headings">
+                    <th><span class="nobr">Filename</span></th>
+                    <th><span class="nobr">Last modified</span></th>
+                    <th><span class="nobr">Size</span></th>
+                    <th><span class="nobr">Metadata</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                $class = 'even';
+                foreach ($files as $file) {
+                    ?>
+                    <tr class="<?php echo $class; ?>">
+                        <td class="a-left">
+                            <a target="_blank" href="<?php echo $linkToDispatcher . '?id=' . $file['id']; ?>"><?php echo $file['name'] ?></a>
+                        </td>
+                        <td class="a-left"><?php echo $file['time'] ?></td>
+                        <td class="a-left"><?php echo $file['size'] ?></td>
+                        <td class="a-left">
+                            <table class="noborder">
+                                <colgroup>
+                                    <col class="a-left">
+                                    <col class="a-left" width="250">
+                                    <col class="a-left" width="75">
+                                </colgroup>
+                                <tbody>
+                                <?php foreach ($file['meta'] as $metadata) { ?>
+                                <tr>
+                                    <td class="a-left">
+                                        <?php echo $metadata['type'] ?>
+                                        <?php
+                                        if ($metadata['type'] == 'Analysis') {
+                                            echo ' of <b>' . $metadata['varname'] . '</b>';
+                                        }
+                                        ?>
+                                    </td>
+                                    <td class="a-right"> in <b title="<?php echo $metadata['file']; ?>"><?php echo $metadata['filename']; ?></b></td>
+                                    <td class="a-left"> line <b><?php echo $metadata['line']; ?></b></td>
+                                </tr>
+                                <?php } ?>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <?php
+                    if ($class == 'even') {
+                        $class = '';
+                    } else {
+                        $class = 'even';
+                    }
+                }
+                ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php } ?>
+
+<style type="text/css">
+    table.data {
+        max-width: 1000px;
+    }
+    table.noborder {
+        border: none;
+    }
+    table.noborder td {
+        border: none;
+    }
+</style>
