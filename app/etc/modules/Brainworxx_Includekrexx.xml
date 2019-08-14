@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<Brainworxx_Includekrexx>
+			<codePool>community</codePool>
+			<active>true</active>
+		</Brainworxx_Includekrexx>
+	</modules>
+</config>

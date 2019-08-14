@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Includekrexx",
+    "type": "magento-module",
+    "license": "GNU-Lesser-General-Public-License-Version-2.1",
+    "homepage": "",
+    "description": "Wrapper module for kreXX with a settings editor in the backend.",
+    "authors": [
+    {
+        "name": "Brainworxx GmbH",
+        "email": "tobias.guelzow@brainworxx.de"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

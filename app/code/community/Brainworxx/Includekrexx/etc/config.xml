@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<config>
+  <modules>
+    <Brainworxx_Includekrexx>
+      <version>1.0.0</version>
+    </Brainworxx_Includekrexx>
+  </modules>
+  
+  <admin>
+    <routers>
+      <adminhtml>
+        <args>
+          <modules>
+            <includekrexx before="Mage_Adminhtml">Brainworxx_Includekrexx_Adminhtml</includekrexx>
+          </modules>
+        </args>
+      </adminhtml>
+    </routers>
+  </admin>
+  
+  <global>
+    <blocks>
+      <includekrexx>
+        <class>Brainworxx_Includekrexx_Block</class>
+      </includekrexx>
+    </blocks>
+    
+    <helpers>
+      <includekrexx>
+        <class>Brainworxx_Includekrexx_Helper</class>
+      </includekrexx>
+    </helpers>
+    
+    <events>
+      <controller_front_init_before>
+        <observers>
+          <brainworxx_includekrexx>
+            <type>singleton</type>
+            <class>Brainworxx_Includekrexx_Model_Observer</class>
+            <method>includeKreXX</method>
+          </brainworxx_includekrexx>
+        </observers>
+      </controller_front_init_before>
+      
+      <resource_get_tablename>
+        <observers>
+          <brainworxx_includekrexx>
+            <type>singleton</type>
+            <class>Brainworxx_Includekrexx_Model_Observer</class>
+            <method>includeKreXX</method>
+          </brainworxx_includekrexx>
+        </observers>
+      </resource_get_tablename>
+    </events>
+  </global>
+  
+  <adminhtml>
+    <layout>
+      <updates>
+        <includekrexx>
+          <file>includekrexx.xml</file>
+        </includekrexx>
+      </updates>
+    </layout>
+  </adminhtml>
+</config>

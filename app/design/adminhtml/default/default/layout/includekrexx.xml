@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<layout>
+  <adminhtml_krexx_docu>
+    <reference name="content">
+      <block type="includekrexx/adminhtml_krexx" name="krexxdocu" template="includekrexx/krexxdocu.phtml" />
+    </reference>
+  </adminhtml_krexx_docu>
+  <adminhtml_krexx_edit>
+    <reference name="content">
+      <block type="includekrexx/adminhtml_krexx" name="krexxedit" template="includekrexx/krexxedit.phtml" />
+    </reference>
+  </adminhtml_krexx_edit>
+</layout>
