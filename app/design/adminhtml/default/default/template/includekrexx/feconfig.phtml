@@ -16,7 +16,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -43,13 +43,14 @@
         <tr><td>do not display</td><td colspan="2"> = kreXX will not display the value.</td></tr>
         <tr><td colspan="3">&nbsp;</td></tr>
 
-        <tr><th colspan="3"><b>Runtime</b></th></tr>
+
+        <tr><th colspan="3"><b>Output</b></th></tr>
         <tr>
             <td><label for="disabled">Disable output:</label></td>
             <td>
-                <select name="runtime[disabled]" id="disabled">
+                <select name="output[disabled]" id="disabled">
                     <?php foreach ($data['settings'] as $key => $value) {
-                        if ($key == $settings['runtime']['disabled']) {
+                        if ($key == $settings['output']['disabled']) {
                             $selected = 'selected="selected"';
                         } else {
                             $selected = '';
@@ -67,6 +68,43 @@
             <td>IP Range:</td>
             <td colspan="2">This setting is not editable on the frontend.</td>
         </tr>
+        <tr>
+            <td><label for="skin">Skin</label></td>
+            <td>
+                <select name="output[skin]" id="skin">
+                    <?php foreach ($data['settings'] as $key => $value) {
+                        if ($key == $settings['output']['skin']) {
+                            $selected = 'selected="selected"';
+                        } else {
+                            $selected = '';
+                        } ?>
+                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td>
+                <input id="factory.skin" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['skin']; ?>/>
+                <label for="factory.skin">Use factory settings</label>
+            </td>
+        </tr>
+        <tr>
+            <td>Destination:</td>
+            <td colspan="2">This setting is not editable on the frontend.</td>
+        </tr>
+        <tr>
+            <td>Maximum files in the logfolder:</td>
+            <td colspan="2">This setting is not editable on the frontend.</td>
+        </tr>
+        <tr>
+            <td colspan="3">&nbsp;</td>
+        </tr>
+
+
+
+
+
+
+        <tr><th colspan="3"><b>Runtime</b></th></tr>
         <tr>
             <td><label for="detectAjax">Try to detect AJAX requests:</label></td>
             <td>
@@ -124,17 +162,33 @@
                 <label for="factory.maxCall">Use factory settings</label>
             </td>
         </tr>
-        <tr><td colspan="3">&nbsp;</td></tr>
-
         <tr>
-            <th colspan="3"><b>Output</b></th>
+            <td><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
+            <td>
+                <select name="runtime[memoryLeft]" id="memoryLeft">
+                    <?php foreach ($data['settings'] as $key => $value) {
+                        if ($key == $settings['runtime']['memoryLeft']) {
+                            $selected = 'selected="selected"';
+                        } else {
+                            $selected = '';
+                        }
+                        ?>
+                        <option
+                            value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td>
+                <input id="factory.memoryLeft" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['memoryLeft']; ?>/>
+                <label for="factory.memoryLeft">Use factory settings</label>
+            </td>
         </tr>
         <tr>
-            <td><label for="skin">Skin</label></td>
+            <td><label for="maxRuntime">Maximum Runtime [Seconds]</label></td>
             <td>
-                <select name="output[skin]" id="skin">
+                <select name="runtime[maxRuntime]" id="maxRuntime">
                     <?php foreach ($data['settings'] as $key => $value) {
-                        if ($key == $settings['output']['skin']) {
+                        if ($key == $settings['runtime']['maxRuntime']) {
                             $selected = 'selected="selected"';
                         } else {
                             $selected = '';
@@ -144,25 +198,13 @@
                 </select>
             </td>
             <td>
-                <input id="factory.skin" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['skin']; ?>/>
-                <label for="factory.skin">Use factory settings</label>
+                <input id="factory.maxRuntime" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['maxRuntime']; ?>/>
+                <label for="factory.maxRuntime">Use factory settings</label>
             </td>
         </tr>
-        <tr>
-            <td>Destination:</td>
-            <td colspan="2">This setting is not editable on the frontend.</td>
-        </tr>
-        <tr>
-            <td>Maximum files in the logfolder:</td>
-            <td colspan="2">This setting is not editable on the frontend.</td>
-        </tr>
-        <tr>
-            <td colspan="3">&nbsp;</td>
-        </tr>
+        <tr><td colspan="3">&nbsp;</td></tr>
 
-         <tr>
-            <th colspan="3"><b>Properties</b></th>
-        </tr>
+        <tr><th colspan="3"><b>Properties</b></th></tr>
         <tr>
             <td><label for="analyseProtected">Analyse protected properties:</label></td>
             <td>
@@ -243,9 +285,8 @@
             <td colspan="3">&nbsp;</td>
         </tr>
 
-        <tr>
-            <th colspan="3"><b>Methods</b></th>
-        </tr>
+
+        <tr><th colspan="3"><b>Methods</b></th></tr>
         <tr>
             <td><label for="analyseProtectedMethods">Analyse protected class methods:</label></td>
             <td>
@@ -284,6 +325,28 @@
                 <label for="factory.analysePrivateMethods">Use factory settings</label>
             </td>
         </tr>
+
+        <tr>
+            <td><label for="analyseGetter">Analyse getter methods:</label></td>
+            <td>
+                <select name="methods[analyseGetter]" id="analyseGetter">
+                    <?php foreach ($data['settings'] as $key => $value) {
+                        if ($key == $settings['methods']['analyseGetter']) {
+                            $selected = 'selected="selected"';
+                        } else {
+                            $selected = '';
+                        } ?>
+                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td>
+                <input id="factory.analyseGetter" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseGetter']; ?>/>
+                <label for="factory.analyseGetter">Use factory settings</label>
+            </td>
+        </tr>
+
+
         <tr>
             <td>List of debug methods to poll for data:</td>
             <td colspan="2">This setting is not editable on the frontend.</td>

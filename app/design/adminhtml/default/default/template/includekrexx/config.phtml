@@ -16,7 +16,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -35,18 +35,20 @@
 ?>
 <h1>Edit kreXX Configuration File</h1>
 <form action="<?php echo $this->getSaveUrl() ?>" method="post" id="editconfig">
-    <table cellpadding="0" cellspacing="2" border="0"
-           class="krexx-config form-list">
-        <tr><th colspan="4"><b>Runtime</b></th></tr>
-         <tr>
+    <table cellpadding="0" cellspacing="2" border="0" class="krexx-config form-list">
+
+
+                <!-- Output -->
+        <tr><th colspan="4"><b>Output</b></th></tr>
+        <tr>
             <td><label for="disabled">Disable output:</label></td>
             <td>
                 <div class="link-store-scope" title="<?php echo $help['disabled']; ?>"></div>
             </td>
             <td>
-                <select name="runtime[disabled]" id="disabled">
+                <select name="output[disabled]" id="disabled">
                     <?php foreach ($this->getSelectBool() as $key => $value) {
-                        if ($value == $settings['runtime']['disabled']) {
+                        if ($value == $settings['output']['disabled']) {
                             $selected = 'selected="selected"';
                         } else {
                             $selected = '';
@@ -61,77 +63,19 @@
                 <label for="factory.disabled">Use factory settings</label>
             </td>
         </tr>
-
         <tr>
             <td><label for="iprange">IP Range:</label></td>
             <td>
                 <div class="link-store-scope" title="<?php echo $help['iprange']; ?>"></div>
             </td>
             <td>
-                <input type="text" value="<?php echo $settings['runtime']['iprange']; ?>" name="runtime[iprange]" id="iprange">
+                <input type="text" value="<?php echo $settings['output']['iprange']; ?>" name="output[iprange]" id="iprange">
             </td>
             <td>
                 <input id="factory.iprange" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['iprange']; ?>/>
                 <label for="factory.iprange">Use factory settings</label>
             </td>
         </tr>
-
-
-        <tr>
-            <td>
-                <label for="detectAjax">Try to detect AJAX requests:</label>
-            </td>
-            <td>
-                <div class="link-store-scope" title="<?php echo $help['detectAjax']; ?>"></div>
-            </td>
-            <td>
-                <select name="runtime[detectAjax]" id="detectAjax">
-                    <?php foreach ($this->getSelectBool() as $key => $value) {
-                        if ($value == $settings['runtime']['detectAjax']) {
-                            $selected = 'selected="selected"';
-                        } else {
-                            $selected = '';
-                        } ?>
-                    <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
-                    <?php } ?>
-                </select>
-            </td>
-            <td>
-                <input id="factory.detectAjax" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['detectAjax']; ?>/>
-                <label for="factory.detectAjax">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td ><label for="level">Maximum nesting level for objects and arrays:</label></td>
-            <td >
-                <div class="link-store-scope" title="<?php echo $help['level']; ?>"></div>
-            </td>
-            <td >
-                <input type="text" value="<?php echo $settings['runtime']['level']; ?>" name="runtime[level]" id="level">
-            </td>
-            <td >
-                <input id="factory.level" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['level']; ?>/>
-                <label for="factory.level">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="maxCall">Maximum amount of calls:</label></td>
-            <td>
-                <div class="link-store-scope" title="<?php echo $help['maxCall']; ?>"></div>
-            </td>
-            <td>
-                <input type="text" value="<?php echo $settings['runtime']['maxCall']; ?>" name="runtime[maxCall]" id="maxCall">
-            </td>
-            <td>
-                <input id="factory.maxCall" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['maxCall']; ?>/>
-                <label for="factory.maxCall">Use factory settings</label>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4">&nbsp;</td>
-        </tr>
-
-        <tr><th colspan="4"><b>Output</b></th></tr>
         <tr>
             <td><label for="skin">Skin</label></td>
             <td>
@@ -193,9 +137,117 @@
             <td colspan="4">&nbsp;</td>
         </tr>
 
+
+
+
+
+
+        <!-- Runtime -->
+        <tr><th colspan="4"><b>Runtime</b></th></tr>
         <tr>
-            <th colspan="4"><b>Properties</b></th>
+            <td>
+                <label for="detectAjax">Try to detect AJAX requests:</label>
+            </td>
+            <td>
+                <div class="link-store-scope" title="<?php echo $help['detectAjax']; ?>"></div>
+            </td>
+            <td>
+                <select name="runtime[detectAjax]" id="detectAjax">
+                    <?php foreach ($this->getSelectBool() as $key => $value) {
+                        if ($value == $settings['runtime']['detectAjax']) {
+                            $selected = 'selected="selected"';
+                        } else {
+                            $selected = '';
+                        } ?>
+                    <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td>
+                <input id="factory.detectAjax" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['detectAjax']; ?>/>
+                <label for="factory.detectAjax">Use factory settings</label>
+            </td>
         </tr>
+        <tr>
+            <td ><label for="level">Maximum nesting level for objects and arrays:</label></td>
+            <td >
+                <div class="link-store-scope" title="<?php echo $help['level']; ?>"></div>
+            </td>
+            <td >
+                <input type="text" value="<?php echo $settings['runtime']['level']; ?>" name="runtime[level]" id="level">
+            </td>
+            <td >
+                <input id="factory.level" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['level']; ?>/>
+                <label for="factory.level">Use factory settings</label>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="maxCall">Maximum amount of calls:</label></td>
+            <td>
+                <div class="link-store-scope" title="<?php echo $help['maxCall']; ?>"></div>
+            </td>
+            <td>
+                <input type="text" value="<?php echo $settings['runtime']['maxCall']; ?>" name="runtime[maxCall]" id="maxCall">
+            </td>
+            <td>
+                <input id="factory.maxCall" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['maxCall']; ?>/>
+                <label for="factory.maxCall">Use factory settings</label>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="memoryLeft">Minimum amout of memory [MB]</label></td>
+            <td>
+                <div class="link-store-scope" title="<?php echo $help['memoryLeft']; ?>"></div>
+            </td>
+            <td>
+                <input type="text" value="<?php echo $settings['runtime']['memoryLeft']; ?>" name="runtime[memoryLeft]" id="memoryLeft">
+            </td>
+            <td>
+                <input id="factory.memoryLeft" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['memoryLeft']; ?>/>
+                <label for="factory.memoryLeft">Use factory settings</label>
+            </td>
+        </tr>
+        <tr>
+            <td ><label for="maxRuntime">Maximum Runtime [Seconds]</label></td>
+            <td >
+                <div class="link-store-scope" title="<?php echo $help['maxRuntime']; ?>"></div>
+            </td>
+            <td >
+                <input type="text" value="<?php echo $settings['runtime']['maxRuntime']; ?>" name="runtime[maxRuntime]" id="maxRuntime">
+            </td>
+            <td >
+                <input id="factory.maxRuntime" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['maxRuntime']; ?>/>
+                <label for="factory.maxRuntime">Use factory settings</label>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="useScopeAnalysis">Use scope analysis:</label></td>
+            <td>
+                <div class="link-store-scope" title="<?php echo $help['useScopeAnalysis']; ?>"></div>
+            </td>
+            <td>
+                <select name="runtime[useScopeAnalysis]" id="useScopeAnalysis">
+                    <?php foreach ($this->getSelectBool() as $key => $value) {
+                        if ($value == $settings['runtime']['useScopeAnalysis']) {
+                            $selected = 'selected="selected"';
+                        } else {
+                            $selected = '';
+                        }
+                        ?>
+                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td>
+                <input id="factory.useScopeAnalysis" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['useScopeAnalysis']; ?>/>
+                <label for="factory.useScopeAnalysis">Use factory settings</label>
+            </td>
+        </tr>
+        <tr><td colspan="4">&nbsp;</td></tr>
+
+
+        <!-- Properties -->
+        <tr><th colspan="4"><b>Properties</b></th></tr>
         <tr>
             <td><label for="analyseProtected">Analyse protected properties:</label></td> <td>
                 <div class="link-store-scope" title="<?php echo $help['analyseProtected']; ?>"></div>
@@ -287,9 +339,9 @@
             <td colspan="4">&nbsp;</td>
         </tr>
 
-         <tr>
-            <th colspan="4"><b>Methods</b></th>
-        </tr>
+
+        <!-- Methods -->
+        <tr><th colspan="4"><b>Methods</b></th></tr>
         <tr>
             <td><label for="analyseProtectedMethods">Analyse protected class methods:</label></td>
             <td>
@@ -335,6 +387,28 @@
             </td>
         </tr>
         <tr>
+            <td><label for="analyseGetter">Analyse getter methods:</label></td>
+            <td>
+                <div class="link-store-scope" title="<?php echo $help['analyseGetter']; ?>"></div>
+            </td>
+            <td>
+                <select name="methods[analyseGetter]" id="analyseGetter">
+                    <?php foreach ($this->getSelectBool() as $key => $value) {
+                        if ($value == $settings['methods']['analyseGetter']) {
+                            $selected = 'selected="selected"';
+                        } else {
+                            $selected = '';
+                        } ?>
+                        <option value="<?php echo $key; ?>" <?php echo $selected; ?> ><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td>
+                <input id="factory.analyseGetter" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseGetter']; ?>/>
+                <label for="factory.analyseGetter">Use factory settings</label>
+            </td>
+        </tr>
+        <tr>
             <td><label for="debugMethods">List of debug methods to poll for data:</label></td>
             <td>
                 <div class="link-store-scope" title="<?php echo $help['debugMethods']; ?>"></div>
@@ -352,9 +426,8 @@
         </tr>
 
 
-        <tr>
-            <th colspan="4"><b>Error Handling and Backtrace</b></th>
-        </tr>
+        <!-- Fatal error handling -->
+        <tr><th colspan="4"><b>Error Handling and Backtrace</b></th></tr>
         <tr>
             <td><label for="registerAutomatically">Register fatel error handler automatically:</label></td>
             <td>
@@ -385,6 +458,8 @@
     <?php echo $this->getBlockHtml('formkey') ?>
     <input type="submit" value="Save configuration">
 </form>
+
+
 
 <style type="text/css">
     input:disabled {

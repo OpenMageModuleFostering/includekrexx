@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -66,7 +66,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
         $data = array();
         $settings = array();
         $factory = array();
-        $storage = \Krexx::$storage;
+        $pool = \Krexx::$pool;
 
         // Setting possible form values.
         $data['settings'] = array(
@@ -78,40 +78,52 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
         // See, if we have any values in the configuration file.
         // See, if we have any values in the configuration file.
         $settings['output']['skin'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('skin')
+            $pool->config->getFeConfigFromFile('skin')
         );
         $settings['runtime']['maxCall'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('maxCall')
+            $pool->config->getFeConfigFromFile('maxCall')
         );
-        $settings['runtime']['disabled'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('disabled')
+        $settings['output']['disabled'] = $this->convertKrexxFeSetting(
+            $pool->config->getFeConfigFromFile('disabled')
         );
         $settings['runtime']['detectAjax'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('detectAjax')
+            $pool->config->getFeConfigFromFile('detectAjax')
         );
         $settings['properties']['analyseProtected'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('analyseProtected')
+            $pool->config->getFeConfigFromFile('analyseProtected')
         );
         $settings['properties']['analysePrivate'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('analysePrivate')
+            $pool->config->getFeConfigFromFile('analysePrivate')
         );
         $settings['properties']['analyseTraversable'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('analyseTraversable')
+            $pool->config->getFeConfigFromFile('analyseTraversable')
         );
         $settings['properties']['analyseConstants'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('analyseConstants')
+            $pool->config->getFeConfigFromFile('analyseConstants')
         );
         $settings['runtime']['level'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('level')
+            $pool->config->getFeConfigFromFile('level')
         );
         $settings['methods']['analyseProtectedMethods'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('analyseProtectedMethods')
+            $pool->config->getFeConfigFromFile('analyseProtectedMethods')
         );
         $settings['methods']['analysePrivateMethods'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('analysePrivateMethods')
+            $pool->config->getFeConfigFromFile('analysePrivateMethods')
         );
         $settings['backtraceAndError']['registerAutomatically'] = $this->convertKrexxFeSetting(
-            $storage->config->getFeConfigFromFile('registerAutomatically')
+            $pool->config->getFeConfigFromFile('registerAutomatically')
+        );
+        $settings['runtime']['memoryLeft'] = $this->convertKrexxFeSetting(
+            $pool->config->getFeConfigFromFile('memoryLeft')
+        );
+        $settings['runtime']['maxRuntime'] = $this->convertKrexxFeSetting(
+            $pool->config->getFeConfigFromFile('maxRuntime')
+        );
+        $settings['methods']['analyseGetter'] = $this->convertKrexxFeSetting(
+            $pool->config->getFeConfigFromFile('analyseGetter')
+        );
+        $settings['runtime']['useScopeAnalysis'] = $this->convertKrexxFeSetting(
+            $pool->config->getFeConfigFromFile('useScopeAnalysis')
         );
 
         // Are these actually set?
@@ -122,7 +134,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
                     // We need to fill these values with the stuff from the
                     // factory settings!
                     $settings[$mainkey][$attribute] = $this->convertKrexxFeSetting(
-                        $storage->config->feConfigFallback[$attribute]
+                        $pool->config->feConfigFallback[$attribute]
                     );
                 } else {
                     $factory[$attribute] = '';

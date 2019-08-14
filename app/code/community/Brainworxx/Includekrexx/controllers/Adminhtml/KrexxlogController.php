@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -82,12 +82,12 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxlogController extends Mage_Adminhtm
      */
     public function getContentAction()
     {
-        $storage = \Krexx::$storage;
+        $pool = \Krexx::$pool;
 
         // No directory traversal for you!
         $id = preg_replace('/[^0-9]/', '', $this->getRequest()->get('id'));
         // Get the filepath.
-        $file = $storage->config->krexxdir . 'log' . DIRECTORY_SEPARATOR . $id . '.Krexx.html';
+        $file = $pool->krexxDir . 'log' . DIRECTORY_SEPARATOR . $id . '.Krexx.html';
 
         $ioFile = new Varien_Io_File();
         if ($ioFile->streamOpen($file, 'rb')) {

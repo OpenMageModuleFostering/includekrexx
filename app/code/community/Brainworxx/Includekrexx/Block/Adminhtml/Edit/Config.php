@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -52,31 +52,36 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
         $help = array();
         $settings = array();
         $factory = array();
-        $storage = \Krexx::$storage;
+        $pool = \Krexx::$pool;
 
         // Initialzing help data for the template.
-        $help['skin'] = htmlspecialchars(strip_tags($storage->messages->getHelp('skin')));
-        $help['iprange'] = htmlspecialchars(strip_tags($storage->messages->getHelp('iprange')));
-        $help['maxfiles'] = htmlspecialchars(strip_tags($storage->messages->getHelp('maxfiles')));
-        $help['destination'] = htmlspecialchars(strip_tags($storage->messages->getHelp('destination')));
-        $help['maxCall'] = htmlspecialchars(strip_tags($storage->messages->getHelp('maxCall')));
+        $help['skin'] = htmlspecialchars(strip_tags($pool->messages->getHelp('skin')));
+        $help['iprange'] = 'List of IPs that can trigger kreXX. Wildcards can be used.';
+        $help['maxfiles'] = htmlspecialchars(strip_tags($pool->messages->getHelp('maxfiles')));
+        $help['destination'] = htmlspecialchars(strip_tags($pool->messages->getHelp('destination')));
+        $help['maxCall'] = htmlspecialchars(strip_tags($pool->messages->getHelp('maxCall')));
         $help['disabled'] = 'Here you can disable kreXX without uninstalling the whole module.';
-        $help['detectAjax'] = htmlspecialchars(strip_tags($storage->messages->getHelp('detectAjax')));
-        $help['analyseProtected'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseProtected')));
-        $help['analysePrivate'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analysePrivate')));
-        $help['analyseTraversable'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseTraversable')));
+        $help['detectAjax'] = htmlspecialchars(strip_tags($pool->messages->getHelp('detectAjax')));
+        $help['analyseProtected'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analyseProtected')));
+        $help['analysePrivate'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analysePrivate')));
+        $help['analyseTraversable'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analyseTraversable')));
         $help['debugMethods'] = 'Comma-separated list of used debug callback functions. kreXX will try to call them,' .
             "if they are available and display their provided data.\nWe Recommend for Magento: '__toArray,toString'";
-        $help['level'] = htmlspecialchars(strip_tags($storage->messages->getHelp('level')));
-        $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseProtectedMethods')));
-        $help['analysePrivateMethods'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analysePrivateMethods')));
-        $help['registerAutomatically'] = htmlspecialchars(strip_tags($storage->messages->getHelp('registerAutomatically')));
-        $help['analyseConstants'] = htmlspecialchars(strip_tags($storage->messages->getHelp('analyseConstants')));
+        $help['level'] = htmlspecialchars(strip_tags($pool->messages->getHelp('level')));
+        $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analyseProtectedMethods')));
+        $help['analysePrivateMethods'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analysePrivateMethods')));
+        $help['registerAutomatically'] = htmlspecialchars(strip_tags($pool->messages->getHelp('registerAutomatically')));
+        $help['analyseConstants'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analyseConstants')));
+        $help['analyseGetter'] = htmlspecialchars(strip_tags($pool->messages->getHelp('analyseGetter')));
+        $help['useScopeAnalysis'] = htmlspecialchars(strip_tags($pool->messages->getHelp('useScopeAnalysis')));
+        $help['memoryLeft'] = htmlspecialchars(strip_tags($pool->messages->getHelp('memoryLeft')));
+        $help['maxRuntime'] = htmlspecialchars(strip_tags($pool->messages->getHelp('maxRuntime')));
+
         $this->assign('help', $help);
 
         // Initializing the select data for the template.
         $this->setSelectDestination(array(
-            'frontend' => 'frontend',
+            'browser' => 'browser',
             'file' => 'file'
         ));
         $this->setSelectBool(array('true' => 'true', 'false' => 'false'));
@@ -86,74 +91,91 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
         ));
         $skins = array();
 
-        foreach ($storage->render->getSkinList() as $skin) {
+
+        foreach ($pool->render->getSkinList() as $skin) {
             $skins[$skin] = $skin;
         }
 
         // Get all values from the configuration file.
-        $settings['output']['skin'] = $storage->config->getConfigFromFile(
+        $settings['output']['skin'] = $pool->config->getConfigFromFile(
             'output',
             'skin'
         );
-        $settings['output']['maxfiles'] = $storage->config->getConfigFromFile(
+        $settings['output']['maxfiles'] = $pool->config->getConfigFromFile(
             'output',
             'maxfiles'
         );
-        $settings['output']['destination'] = $storage->config->getConfigFromFile(
+        $settings['output']['destination'] = $pool->config->getConfigFromFile(
             'output',
             'destination'
         );
-        $settings['runtime']['maxCall'] = $storage->config->getConfigFromFile(
+        $settings['runtime']['maxCall'] = $pool->config->getConfigFromFile(
             'runtime',
             'maxCall'
         );
-        $settings['runtime']['disabled'] = $storage->config->getConfigFromFile(
-            'runtime',
+        $settings['output']['disabled'] = $pool->config->getConfigFromFile(
+            'output',
             'disabled'
         );
-        $settings['runtime']['iprange'] = $storage->config->getConfigFromFile(
-            'runtime',
+        $settings['output']['iprange'] = $pool->config->getConfigFromFile(
+            'output',
             'iprange'
         );
-        $settings['runtime']['detectAjax'] = $storage->config->getConfigFromFile(
+        $settings['runtime']['detectAjax'] = $pool->config->getConfigFromFile(
             'runtime',
             'detectAjax'
         );
-        $settings['properties']['analyseProtected'] = $storage->config->getConfigFromFile(
+        $settings['properties']['analyseProtected'] = $pool->config->getConfigFromFile(
             'properties',
             'analyseProtected'
         );
-        $settings['properties']['analysePrivate'] = $storage->config->getConfigFromFile(
+        $settings['properties']['analysePrivate'] = $pool->config->getConfigFromFile(
             'properties',
             'analysePrivate'
         );
-        $settings['properties']['analyseConstants'] = $storage->config->getConfigFromFile(
+        $settings['properties']['analyseConstants'] = $pool->config->getConfigFromFile(
             'properties',
             'analyseConstants'
         );
-        $settings['properties']['analyseTraversable'] = $storage->config->getConfigFromFile(
+        $settings['properties']['analyseTraversable'] = $pool->config->getConfigFromFile(
             'properties',
             'analyseTraversable'
         );
-        $settings['methods']['debugMethods'] = $storage->config->getConfigFromFile(
+        $settings['methods']['debugMethods'] = $pool->config->getConfigFromFile(
             'methods',
             'debugMethods'
         );
-        $settings['runtime']['level'] = $storage->config->getConfigFromFile(
+        $settings['runtime']['level'] = $pool->config->getConfigFromFile(
             'runtime',
             'level'
         );
-        $settings['methods']['analyseProtectedMethods'] = $storage->config->getConfigFromFile(
+        $settings['methods']['analyseProtectedMethods'] = $pool->config->getConfigFromFile(
             'methods',
             'analyseProtectedMethods'
         );
-        $settings['methods']['analysePrivateMethods'] = $storage->config->getConfigFromFile(
+        $settings['methods']['analysePrivateMethods'] = $pool->config->getConfigFromFile(
             'methods',
             'analysePrivateMethods'
         );
-        $settings['backtraceAndError']['registerAutomatically'] = $storage->config->getConfigFromFile(
+        $settings['backtraceAndError']['registerAutomatically'] = $pool->config->getConfigFromFile(
             'backtraceAndError',
             'registerAutomatically'
+        );
+        $settings['methods']['analyseGetter'] = $pool->config->getConfigFromFile(
+            'methods',
+            'analyseGetter'
+        );
+        $settings['runtime']['useScopeAnalysis'] = $pool->config->getConfigFromFile(
+            'runtime',
+            'useScopeAnalysis'
+        );
+        $settings['runtime']['memoryLeft'] = $pool->config->getConfigFromFile(
+            'runtime',
+            'memoryLeft'
+        );
+        $settings['runtime']['maxRuntime'] = $pool->config->getConfigFromFile(
+            'runtime',
+            'maxRuntime'
         );
 
         // Are these actually set?
@@ -162,7 +184,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
                 if (is_null($config)) {
                     $factory[$attribute] = ' checked="checked" ';
                     // We need to fill these values with the stuff from the factory settings!
-                    $settings[$mainkey][$attribute] = $storage->config->configFallback[$mainkey][$attribute];
+                    $settings[$mainkey][$attribute] = $pool->config->configFallback[$mainkey][$attribute];
                 } else {
                     $factory[$attribute] = '';
                 }

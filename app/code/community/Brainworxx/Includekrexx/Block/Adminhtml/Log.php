@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -45,10 +45,10 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Log extends Mage_Adminhtml_Block_T
     public function _construct()
     {
         parent::_construct();
-        $storage = \Krexx::$storage;
+        $pool = \Krexx::$pool;
 
         // 1. Get the log folder.
-        $dir = $storage->config->krexxdir . 'log' . DIRECTORY_SEPARATOR;
+        $dir = $pool->krexxDir . 'log' . DIRECTORY_SEPARATOR;
 
         // 2. Get the file list and sort it.
         // Meh, Varien_Io_File does not allow a filter or sorting.

@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -34,7 +34,7 @@
 
 namespace Brainworxx\Krexx\Service\Config;
 
-use Brainworxx\Krexx\Service\Storage;
+use Brainworxx\Krexx\Service\Factory\Pool;
 
 /**
  * Configuration fallback settings.
@@ -45,30 +45,22 @@ use Brainworxx\Krexx\Service\Storage;
  */
 class Fallback
 {
-    /**
-     * The directory where kreXX is stored.
-     *
-     * @var string
-     */
-    public $krexxdir;
 
     /**
      * Here we store all relevant data.
      *
-     * @var Storage
+     * @var Pool
      */
-    protected $storage;
+    protected $pool;
 
     /**
-     * Injects the storage and initializes the security.
+     * Injects the pool and initializes the security.
      *
-     * @param Storage $storage
-     * @param string $krexxdir
+     * @param Pool $pool
      */
-    public function __construct(Storage $storage, $krexxdir)
+    public function __construct(Pool $pool)
     {
-        $this->storage = $storage;
-        $this->krexxdir = $krexxdir;
+        $this->pool = $pool;
     }
 
     /**
@@ -77,18 +69,20 @@ class Fallback
      * @var array
      */
     public $configFallback = array(
-        'runtime' => array(
+        'output' => array(
             'disabled' => 'false',
             'iprange' => '*',
-            'detectAjax' => 'true',
-            'level' => '5',
-            'maxCall' => '10',
-        ),
-        'output' => array(
             'skin' => 'smokygrey',
-            'destination' => 'frontend',
+            'destination' => 'browser',
             'maxfiles' => '10',
-
+        ),
+        'runtime' => array(
+            'detectAjax' => 'true',
+            'level' => '10',
+            'maxCall' => '20',
+            'maxRuntime' => '60',
+            'memoryLeft' => '64',
+            'useScopeAnalysis' => 'true',
         ),
         'properties' => array(
             'analyseProtected' => 'false',
@@ -99,6 +93,7 @@ class Fallback
         'methods' => array(
             'analyseProtectedMethods' => 'false',
             'analysePrivateMethods' => 'false',
+            'analyseGetter' => 'true',
             'debugMethods' => 'debug,__toArray,toArray,__toString,toString,_getProperties,__debugInfo,getProperties',
         ),
         'backtraceAndError' => array(
@@ -180,6 +175,22 @@ class Fallback
             'type' => 'Input',
             'editable' => 'true',
         ),
+        'analyseGetter' => array(
+            'type' => 'Select',
+            'editable' => 'true',
+        ),
+        'memoryLeft' => array(
+            'type' => 'Input',
+            'editable' => 'true',
+        ),
+        'maxRuntime' => array(
+            'type' => 'Input',
+            'editable' => 'true',
+        ),
+        'useScopeAnalysis' => array(
+            'type' => 'Select',
+            'editable' => 'true',
+        ),
     );
 
     /**
@@ -201,8 +212,8 @@ class Fallback
     /**
      * Known Problems with debug functions, which will most likely cause a fatal.
      *
-     * Used by Objects::pollAllConfiguredDebugMethods() to determine
-     * if we might expect problems.
+     * @see \Brainworxx\Krexx\Service\Config\Security->isAllowedDebugCall()
+     * @see \Brainworxx\Krexx\Analyse\Callback\Analyse\Objects->pollAllConfiguredDebugMethods()
      *
      * @var array
      */
@@ -212,15 +223,39 @@ class Fallback
         // In the TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper the private
         // $viewHelperNode might not be an object, and trying to render it might
         // cause a fatal error!
-        'TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper' => '__toString',
+        '\\TYPO3\\CMS\\Fluid\\Core\\ViewHelper\\AbstractViewHelper' => array('__toString'),
 
-        // Will throw an error.
-        'ReflectionClass' => '__toString',
-
-        // Deleting all rows from the DB via typo3 reopsitory is NOT a good
+        // Deleting all rows from the DB via typo3 repository is NOT a good
         // debug method!
-        'RepositoryInterface' => 'removeAll',
-        'Tx_Extbase_Persistence_RepositoryInterface' => 'removeAll',
+        '\\TYPO3\\CMS\\Extbase\\Persistence\\RepositoryInterface' => array('removeAll'),
+        'Tx_Extbase_Persistence_RepositoryInterface' => array('removeAll'),
+
+        // The lazy loading proxy may not have loaded the object at this time.
+        '\\TYPO3\\CMS\\Extbase\\Persistence\\Generic\\LazyLoadingProxy' => array('__toString'),
+    );
+
+    /**
+     * These classes will never be polled by debug methods, because that would
+     * most likely cause a fatal.
+     *
+     * @see \Brainworxx\Krexx\Service\Config\Security->isAllowedDebugCall()
+     * @see \Brainworxx\Krexx\Analyse\Callback\Analyse\Objects->pollAllConfiguredDebugMethods()
+     *
+     * @var array
+     */
+    protected $debugClassBlacklist = array(
+        // Fun with reflection classes. Not really.
+        '\\ReflectionClass',
+        '\\ReflectionFunction',
+        '\\ReflectionMethod',
+        '\\ReflectionParameter',
+        '\\ReflectionZendExtension',
+        '\\ReflectionExtension',
+        '\\ReflectionFunctionAbstract',
+        '\\ReflectionObject',
+        '\\ReflectionType',
+        '\\ReflectionGenerator',
+        '\\Reflector',
     );
 
     /**
@@ -228,5 +263,5 @@ class Fallback
      *
      * @var string
      */
-    public $version = '2.0.1';
+    public $version = '2.2.0';
 }

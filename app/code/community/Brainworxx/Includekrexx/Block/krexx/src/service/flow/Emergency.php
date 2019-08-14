@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -34,7 +34,7 @@
 
 namespace Brainworxx\Krexx\Service\Flow;
 
-use Brainworxx\Krexx\Service\Storage;
+use Brainworxx\Krexx\Service\Factory\Pool;
 
 /**
  * Emergency break handler for large output (runtime and memory usage).
@@ -76,7 +76,7 @@ class Emergency
      *
      * @var int
      */
-    protected $maxRuntime = 60;
+    protected $maxRuntime = 0;
 
     /**
      * The server memory limit, coming from the php.ini.
@@ -90,7 +90,7 @@ class Emergency
      *
      * @var int
      */
-    protected $minMemoryLeft = 64;
+    protected $minMemoryLeft = 0;
 
     /**
      * The level inside the object/array hierarchy we are in.
@@ -100,21 +100,21 @@ class Emergency
     protected $nestingLevel = 0;
 
     /**
-     * The storage, where we store the classes we need.
+     * The pool, where we store the classes we need.
      *
-     * @var Storage
+     * @var Pool
      */
-    protected $storage;
+    protected $pool;
 
     /**
      * Get some system and config data during construct.
      *
-     * @param Storage $storage
-     *   The storage, where we store the classes we need.
+     * @param Pool $pool
+     *   The pool, where we store the classes we need.
      */
-    public function __construct(Storage $storage)
+    public function __construct(Pool $pool)
     {
-        $this->storage = $storage;
+        $this->pool = $pool;
 
         // Cache the server memory limit.
         $limit = strtoupper(ini_get('memory_limit'));
@@ -127,6 +127,10 @@ class Emergency
                 $this->serverMemoryLimit = $matches[1] * 1024;
             }
         }
+
+        // Cache some settings.
+        $this->maxRuntime = (int) $pool->config->getSetting('maxRuntime');
+        $this->minMemoryLeft = (int) $pool->config->getSetting('memoryLeft');
     }
 
     /**
@@ -164,7 +168,7 @@ class Emergency
         // Check Runtime.
         if ($this->timer + $this->maxRuntime <= time()) {
             // This is taking longer than expected.
-            $this->storage->messages->addMessage('Emergency break due to extensive run time!');
+            $this->pool->messages->addMessage('Emergency break due to extensive run time!');
             \Krexx::editSettings();
             \Krexx::disable();
             self::$allIsOk = false;
@@ -179,7 +183,7 @@ class Emergency
             $left = $this->serverMemoryLimit - $usage;
             // Is more left than is configured?
             if ($left < $this->minMemoryLeft * 1024 * 1024) {
-                $this->storage->messages->addMessage('Emergency break due to extensive memory usage!');
+                $this->pool->messages->addMessage('Emergency break due to extensive memory usage!');
                 // Show settings to give the dev to repair the situation.
                 \Krexx::editSettings();
                 \Krexx::disable();
@@ -216,7 +220,7 @@ class Emergency
      */
     public function checkNesting()
     {
-        return ($this->nestingLevel > (int)$this->storage->config->getSetting('level'));
+        return ($this->nestingLevel > (int)$this->pool->config->getSetting('level'));
     }
 
     /**
@@ -251,14 +255,14 @@ class Emergency
     public function checkMaxCall()
     {
         $result = false;
-        $maxCall = (int)$this->storage->config->getSetting('maxCall');
+        $maxCall = (int)$this->pool->config->getSetting('maxCall');
         if ($this->krexxCount >= $maxCall) {
             // Called too often, we might get into trouble here!
             $result = true;
         }
         // Give feedback if this is our last call.
         if ($this->krexxCount === $maxCall - 1) {
-            $this->storage->messages->addMessage($this->storage->messages->getHelp('maxCallReached'), 'critical');
+            $this->pool->messages->addMessage($this->pool->messages->getHelp('maxCallReached'), 'critical');
         }
         $this->krexxCount++;
         return $result;

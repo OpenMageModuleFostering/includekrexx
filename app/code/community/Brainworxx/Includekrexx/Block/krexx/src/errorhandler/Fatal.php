@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -39,7 +39,7 @@ namespace Brainworxx\Krexx\Errorhandler;
  *
  * @package Brainworxx\Krexx\Errorhandler
  */
-class Fatal extends Error
+class Fatal extends AbstractError
 {
 
     /**
@@ -113,7 +113,9 @@ class Fatal extends Error
                     'file' => $error['file'],
                     'backtrace' => $this->tickedBacktrace,
                 );
-                $this->storage->controller->errorAction($errorData);
+                $this->pool
+                    ->createClass('Brainworxx\\Krexx\\Controller\\errorController')
+                    ->errorAction($errorData);
             }
         }
         // Clean exit.

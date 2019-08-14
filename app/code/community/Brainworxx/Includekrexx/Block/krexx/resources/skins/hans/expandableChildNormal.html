@@ -1,11 +1,14 @@
-<li class="kchild" data-source="{gensource}">
-  <div class="kel kexpand {isExpanded} {ktype}">
-    <span class="kname">{connector1}{name}{connector2}</span>
-    <span>{additional}</span>
-    <em class="ktype">({type})</em>
-    {help}
-    <span class="kcollapse-me">&nbsp;</span>
-    {sourcebutton}
-    <div class="kcodedisplay" style="display: none"></div>
-  </div>
-  {nest}
+<li class="kchild" data-source="{gensource}"  data-codewrapper1="{codewrapper1}" data-codewrapper2="{codewrapper2}">
+    <div class="kel kexpand {isExpanded} {ktype}">
+        {connector1}
+        <span class="kname">{name}</span>
+        {connector2}
+        <em class="karrow ktype">=</em>
+        <span>{normal}</span>
+        <em class="ktype">({type})</em>
+        {help}
+        <span class="kcollapse-me">&nbsp;</span>
+        {sourcebutton}
+        <div class="kcodedisplay" style="display: none"></div>
+    </div>
+    {nest}

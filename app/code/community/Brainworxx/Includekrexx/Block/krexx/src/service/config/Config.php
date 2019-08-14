@@ -17,7 +17,7 @@
  *
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2017 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -34,7 +34,8 @@
 
 namespace Brainworxx\Krexx\Service\Config;
 
-use Brainworxx\Krexx\Service\Storage;
+use Brainworxx\Krexx\Service\Factory\Pool;
+use Brainworxx\Krexx\Service\Misc\File;
 
 /**
  * Access the debug settings here.
@@ -52,6 +53,13 @@ class Config extends Fallback
     public $security;
 
     /**
+     * The file service used for reading and writing files.
+     *
+     * @var File
+     */
+    protected $fileService;
+
+    /**
      * The current position of our iterator array.
      *
      * @var int
@@ -66,15 +74,15 @@ class Config extends Fallback
     public $settings = array();
 
     /**
-     * Injection the storage and loading the configuration.
+     * Injection the pool and loading the configuration.
      *
-     * @param \Brainworxx\Krexx\Service\Storage $storage
-     * @param string $krexxdir
+     * @param \Brainworxx\Krexx\Service\Factory\Pool $pool
      */
-    public function __construct(Storage $storage, $krexxdir)
+    public function __construct(Pool $pool)
     {
-        parent::__construct($storage, $krexxdir);
-        $this->security = new Security($storage, $krexxdir);
+        parent::__construct($pool);
+        $this->security = $pool->createClass('Brainworxx\\Krexx\\Service\\Config\\Security');
+        $this->fileService = $pool->createClass('Brainworxx\\Krexx\\Service\\Misc\\File');
 
         // Loading the settings.
         foreach ($this->configFallback as $section => $settings) {
@@ -137,10 +145,10 @@ class Config extends Fallback
     }
 
     /**
-     * Wrapper arroun+d the stored settings array, to intercept settings calls.
+     * Wrapper around the stored settings array, to intercept settings calls.
      *
      * @param string $name
-     *   The nbame of the setting.
+     *   The name of the setting.
      *
      * @return string|null
      *   The setting.
@@ -219,8 +227,9 @@ class Config extends Fallback
         }
 
         $feConfig = $this->getFeConfig($name);
-        $model = new Model();
-        $model->setSection($section)
+        /** @var Model $model */
+        $model = $this->pool->createClass('Brainworxx\\Krexx\\Service\\Config\Model')
+            ->setSection($section)
             ->setEditable($feConfig[0])
             ->setType($feConfig[1]);
 
@@ -348,7 +357,10 @@ class Config extends Fallback
 
         // Not loaded?
         if (empty($config)) {
-            $config = (array)parse_ini_string($this->storage->getFileContents($this->krexxdir . 'Krexx.ini'), true);
+            $config = (array)parse_ini_string(
+                $this->fileService->getFileContents($this->getPathToIniFile()),
+                true
+            );
             if (empty($config)) {
                 // Still empty means that there is no ini file. We add a dummy.
                 // This will prevent the failing reload of the ini file.
@@ -416,7 +428,7 @@ class Config extends Fallback
      */
     protected function isRequestAjaxOrCli()
     {
-        if ($this->getConfigValue('output', 'destination') != 'file') {
+        if ($this->getConfigValue('output', 'destination') !== 'file') {
             // When we are not going to create a logfile, we send it to the browser.
             // Check for ajax.
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
@@ -437,5 +449,54 @@ class Config extends Fallback
         }
         // Still here? This means it's neither.
         return false;
+    }
+
+    /**
+     * Get the path to the chunks directory.
+     *
+     * @return string
+     *   The absolute path, trailed by the '/'
+     */
+    public function getChunkDir()
+    {
+        if (!empty($GLOBALS['kreXXoverwrites']['directories']['chunks'])) {
+            // Return the Overwrites
+            return $GLOBALS['kreXXoverwrites']['directories']['chunks'] . DIRECTORY_SEPARATOR;
+        } else {
+            // Return the standard settings.
+            return $this->pool->krexxDir . 'chunks' . DIRECTORY_SEPARATOR;
+        }
+    }
+
+    /**
+     * Get the path to the logging directory.
+     *
+     * @return string
+     *   The absolute path, trailed by the '/'
+     */
+    public function getLogDir()
+    {
+        if (!empty($GLOBALS['kreXXoverwrites']['directories']['log'])) {
+            // Return the Overwrites
+            return $GLOBALS['kreXXoverwrites']['directories']['log'] . DIRECTORY_SEPARATOR;
+        } else {
+            return $this->pool->krexxDir . 'log' . DIRECTORY_SEPARATOR;
+        }
+    }
+
+    /**
+     * Get the path to the configuration file.
+     *
+     * @return string
+     *   The absolute path to the Krexx.ini.
+     */
+    public function getPathToIniFile()
+    {
+        if (!empty($GLOBALS['kreXXoverwrites']['directories']['config'])) {
+            // Return the Overwrites
+            return $GLOBALS['kreXXoverwrites']['directories']['config'] . DIRECTORY_SEPARATOR . 'Krexx.ini';
+        } else {
+            return $this->pool->krexxDir . 'config' . DIRECTORY_SEPARATOR . 'Krexx.ini';
+        }
     }
 }
