@@ -16,7 +16,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -57,7 +57,7 @@ class Fatal extends AbstractHandler {
       'analyseTraversable' => 'true',
     ),
     'methods' => array(
-      'analysePublicMethods' => 'true',
+      'analyseMethodsAtall' => 'true',
       'analyseProtectedMethods' => 'true',
       'analysePrivateMethods' => 'true',
     ),
@@ -112,7 +112,10 @@ class Fatal extends AbstractHandler {
 
     // Do we have an error at all?
     if (!is_null($error) && $this->getIsActive()) {
-      // De we need to check this one, according to our settings?
+      // We will not generate any code here!
+      Framework\Config::$allowCodegen = FALSE;
+
+      // Do we need to check this one, according to our settings?
       $translated_error = $this->translateErrorType($error['type']);
       if ($translated_error[1] == 'traceFatals') {
         // We don't want to analyse the errorhandler, that will only

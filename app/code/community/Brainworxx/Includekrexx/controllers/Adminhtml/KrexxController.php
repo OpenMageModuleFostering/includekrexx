@@ -53,7 +53,7 @@ class Brainworxx_Includekrexx_Adminhtml_KrexxController extends Mage_Adminhtml_C
     'analyseTraversable',
     'debugMethods',
     'level',
-    'analysePublicMethods',
+    'analyseMethodsAtall',
     'analyseProtectedMethods',
     'analysePrivateMethods',
     'registerAutomatically',

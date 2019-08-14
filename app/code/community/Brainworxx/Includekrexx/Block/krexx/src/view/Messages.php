@@ -16,7 +16,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -32,6 +32,7 @@
  */
 
 namespace Brainworxx\Krexx\View;
+use Brainworxx\Krexx\Framework\Toolbox;
 
 
 /**
@@ -48,6 +49,8 @@ class Messages {
    */
   protected static $messages = array();
 
+  protected static $keys = array();
+
   /**
    * The message we want to add. It will be displayed in the output.
    *
@@ -61,13 +64,38 @@ class Messages {
   }
 
   /**
+   * Adds message keys to the key array.
+   *
+   * The same as the addMessage, but we add language keys for a potential
+   * backend integration (includekrexx for example).
+   *
+   * @param string $key
+   *   The key for the translation function.
+   * @param NULL|array
+   *   The parameters for the string replacements inside the translation.
+   */
+  public static function addKey($key, $params = NULL) {
+    self::$keys[$key] = array('key' => $key, 'params' => $params);
+  }
+
+  /**
+   * Getter for the language key array.
+   *
+   * @return array
+   *   The language keys we added beforehand.
+   */
+  public static function getKeys() {
+    return self::$keys;
+  }
+
+  /**
    * Renders the output of the messages.
    *
    * @return string
    *   The rendered html output of the messages.
    */
   public static function outputMessages() {
-    // Simple Wrapper for Render::renderMessages
+    // Simple Wrapper for SkinRender::renderMessages
     if (php_sapi_name() == "cli") {
       if (count(self::$messages)) {
         $result = "\n\nkreXX messages\n";
@@ -81,7 +109,9 @@ class Messages {
       }
     }
     else {
-      return Render::renderMessages(self::$messages);
+      return SkinRender::renderMessages(self::$messages);
     }
+    // Still here?
+    return '';
   }
 }

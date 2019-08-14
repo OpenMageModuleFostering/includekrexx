@@ -68,7 +68,7 @@
       <h3>Usage</h3>
       <div class="comment">
         kreXX will be called in the PHP source code:
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\krexx($myObject);</code></pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx($myObject);</code></pre></div>
 
         Most of the time you will use this method. kreXX will analyse the $object and give you detailed information about it:
         <ul>
@@ -82,22 +82,22 @@
 
         <br /><br />
         Start a benchmark:
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\kreXX::timerStart();</code></pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx::timerStart();</code></pre></div>
         <br />
         Define a "moment" during a benchmark test. The $string should be something meaningful, like "Model invoice db call":
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\kreXX::timerMoment($string);</code></pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx::timerMoment($string);</code></pre></div>
         <br />
         End the benchmark test and displays the result:
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\kreXX::timerEnd();</code></pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx::timerEnd();</code></pre></div>
         <br />
         Outputs backtrace with sourcecode. When kreXX finds objects inside the backtrace, it will analyse them:
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\kreXX::backtrace();</code>	</pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx::backtrace();</code>	</pre></div>
         <br />
         Register the fatal error handler in the system:
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\krexx::registerFatal();</code></pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx::registerFatal();</code></pre></div>
         <br />
         Unregister the fatal error handler in the system:
-        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>\krexx::unregisterFatal();</code></pre></div>
+        <div style="background-color: #efefef; border: 1px solid #d8d8d8; margin: -1px 0 0; padding: 10px 10px 10px 26px;"><pre><code>krexx::unregisterFatal();</code></pre></div>
       </div>
     </fieldset>
     <script type="text/javascript">//&lt;![CDATA[Fieldset.applyCollapse('usage');//]]&gt;</script>

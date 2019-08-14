@@ -367,11 +367,11 @@
       <th colspan="3"><b>Methods</b></th>
     </tr>
     <tr>
-      <td><label for="analysePublicMethods">Analyse public methods:</label></td>
+      <td><label for="analyseMethodsAtall">Analyse class methods at all:</label></td>
       <td>
-        <select name="methods[analysePublicMethods]" id="analysePublicMethods">
+        <select name="methods[analyseMethodsAtall]" id="analyseMethodsAtall">
           <?php foreach($data['settings'] as $key => $value) {
-                if ($key == $settings['methods']['analysePublicMethods']) {
+                if ($key == $settings['methods']['analyseMethodsAtall']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -383,12 +383,12 @@
         </select>
       </td>
       <td>
-        <input id="factory.analysePublicMethods" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analysePublicMethods']; ?>/>
-        <label for="factory.analysePublicMethods">Use factory settings</label>
+        <input id="factory.analyseMethodsAtall" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseMethodsAtall']; ?>/>
+        <label for="factory.analyseMethodsAtall">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td><label for="analyseProtectedMethods">Analyse protected methods:</label></td>
+      <td><label for="analyseProtectedMethods">Analyse protected class methods:</label></td>
       <td>
         <select name="methods[analyseProtectedMethods]" id="analyseProtectedMethods">
           <?php foreach($data['settings'] as $key => $value) {
@@ -409,7 +409,7 @@
       </td>
     </tr>
     <tr>
-      <td><label for="analysePrivateMethods">Analyse private methods:</label></td>
+      <td><label for="analysePrivateMethods">Analyse private class methods:</label></td>
       <td>
         <select name="methods[analysePrivateMethods]" id="analysePrivateMethods">
           <?php foreach($data['settings'] as $key => $value) {

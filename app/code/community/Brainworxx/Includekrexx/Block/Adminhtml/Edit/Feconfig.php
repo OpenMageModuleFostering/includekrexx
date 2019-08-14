@@ -78,7 +78,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
     $settings['deep']['analyseTraversable'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analyseTraversable'));
     $settings['deep']['debugMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('debugMethods'));
     $settings['deep']['level'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('level'));
-    $settings['methods']['analysePublicMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analysePublicMethods'));
+    $settings['methods']['analyseMethodsAtall'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analyseMethodsAtall'));
     $settings['methods']['analyseProtectedMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analyseProtectedMethods'));
     $settings['methods']['analysePrivateMethods'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('analysePrivateMethods'));
     $settings['errorHandling']['registerAutomatically'] = $this->convertKrexxFeSetting(\Brainworxx\Krexx\Framework\Config::getFeConfigFromFile('registerAutomatically'));

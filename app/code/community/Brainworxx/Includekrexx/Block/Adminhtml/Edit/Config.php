@@ -61,7 +61,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
     $help['analyseTraversable'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseTraversable')));
     $help['debugMethods'] = "Comma-separated list of used debug callback functions. kreXX will try to call them, if they are available and display their provided data.\nWe Recommend for Magento: '__toArray,toString'";
     $help['level'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('level')));
-    $help['analysePublicMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePublicMethods')));
+    $help['analyseMethodsAtall'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseMethodsAtall')));
     $help['analyseProtectedMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analyseProtectedMethods')));
     $help['analysePrivateMethods'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('analysePrivateMethods')));
     $help['registerAutomatically'] = htmlspecialchars(strip_tags(\Brainworxx\Krexx\View\Help::getHelp('registerAutomatically')));
@@ -93,7 +93,7 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Config extends Mage_Adminhtml
     $settings['deep']['analyseTraversable'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'analyseTraversable');
     $settings['deep']['debugMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'debugMethods');
     $settings['deep']['level'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('deep', 'level');
-    $settings['methods']['analysePublicMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analysePublicMethods');
+    $settings['methods']['analyseMethodsAtall'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analyseMethodsAtall');
     $settings['methods']['analyseProtectedMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analyseProtectedMethods');
     $settings['methods']['analysePrivateMethods'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('methods', 'analysePrivateMethods');
     $settings['errorHandling']['registerAutomatically'] = \Brainworxx\Krexx\Framework\Config::getConfigFromFile('errorHandling', 'registerAutomatically');

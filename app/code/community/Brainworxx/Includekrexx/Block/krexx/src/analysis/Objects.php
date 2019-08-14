@@ -16,7 +16,7 @@
  * @license http://opensource.org/licenses/LGPL-2.1
  *   GNU Lesser General Public License Version 2.1
  *
- *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *   kreXX Copyright (C) 2014-2016 Brainworxx GmbH
  *
  *   This library is free software; you can redistribute it and/or modify it
  *   under the terms of the GNU Lesser General Public License as published by
@@ -34,6 +34,7 @@
 namespace Brainworxx\Krexx\Analysis;
 
 use Brainworxx\Krexx\Framework;
+use Brainworxx\Krexx\Framework\Internals;
 use Brainworxx\Krexx\View;
 
 /**
@@ -70,7 +71,7 @@ class Objects {
     if (Hive::isInHive($data)) {
       // Tell them, we've been here before
       // but also say who we are.
-      $output .= View\Render::renderRecursion($name, get_class($data), Framework\Toolbox::generateDomIdFromObject($data), $connector1, $connector2);
+      $output .= View\SkinRender::renderRecursion($name, $additional . 'class', get_class($data), Framework\Toolbox::generateDomIdFromObject($data), $connector1, $connector2);
 
       // We will not render this one, but since we
       // return to wherever we came from, we need to decrease the level.
@@ -83,7 +84,7 @@ class Objects {
     $anon_function = function (&$parameter) {
       $data = $parameter[0];
       $name = $parameter[1];
-      $output = View\Render::renderSingeChildHr();;
+      $output = View\SkinRender::renderSingeChildHr();;
 
       $ref = new \ReflectionClass($data);
 
@@ -93,7 +94,7 @@ class Objects {
       // Adding undeclared public properties to the dump.
       // Those are properties which are not visible with
       // $ref->getProperties(\ReflectionProperty::IS_PUBLIC);
-      // but can are in get_object_vars();
+      // but are in get_object_vars();
       // 1. Make a list of all properties
       // 2. Remove those that are listed in
       // $ref->getProperties(\ReflectionProperty::IS_PUBLIC);
@@ -107,24 +108,34 @@ class Objects {
           $ref_props[] = new Flection($value, $key);
         }
       }
+
+      // We will dum the properties alphabetically sorted, via this callback
+      $sorting_callback = function ($a, $b) {
+          return strcmp($a->name, $b->name);
+        };
+
       if (count($ref_props)) {
+        usort($ref_props, $sorting_callback);
         $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Public properties');
         // Adding a HR to reflect that the following stuff are not public
         // properties anymore.
-        $output .= View\Render::renderSingeChildHr();
+        $output .= View\SkinRender::renderSingeChildHr();
       }
 
       // Dumping protected properties.
-      if (Framework\Config::getConfigValue('deep', 'analyseProtected') == 'true') {
+      if (Framework\Config::getConfigValue('deep', 'analyseProtected') == 'true' || Internals::isInScope()) {
         $ref_props = $ref->getProperties(\ReflectionProperty::IS_PROTECTED);
+        usort($ref_props, $sorting_callback);
+
         if (count($ref_props)) {
           $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Protected properties');
         }
       }
 
       // Dumping private properties.
-      if (Framework\Config::getConfigValue('deep', 'analysePrivate') == 'true') {
+      if (Framework\Config::getConfigValue('deep', 'analysePrivate') == 'true' || Internals::isInScope()) {
         $ref_props = $ref->getProperties(\ReflectionProperty::IS_PRIVATE);
+        usort($ref_props, $sorting_callback);
         if (count($ref_props)) {
           $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Private properties');
         }
@@ -139,16 +150,16 @@ class Objects {
       }
 
       // Dumping all configured debug functions.
-      $output .= Objects::pollAllConfiguredDebugMethods($data, $name);
+      $output .= Objects::pollAllConfiguredDebugMethods($data);
 
       // Adding a HR for a better readability.
-      $output .= View\Render::renderSingeChildHr();
+      $output .= View\SkinRender::renderSingeChildHr();
       return $output;
     };
 
 
     // Output data from the class.
-    $output .= View\Render::renderExpandableChild($name, $additional . 'class', $anon_function, $parameter, get_class($data), Framework\Toolbox::generateDomIdFromObject($data), '', FALSE, $connector1, $connector2);
+    $output .= View\SkinRender::renderExpandableChild($name, $additional . 'class', $anon_function, $parameter, get_class($data), Framework\Toolbox::generateDomIdFromObject($data), '', FALSE, $connector1, $connector2);
     // We've finished this one, and can decrease the level setting.
     $level--;
     return $output;
@@ -198,7 +209,7 @@ class Objects {
         // Check memory and runtime.
         if (!Internals::checkEmergencyBreak()) {
           // No more took too long, or not enough memory is left.
-          View\Messages::addMessage("Emergency break for large output during rendering process.\n\nYou should try to switch to file output.");
+          View\Messages::addMessage("Emergency break for large output during analysis process.");
           return '';
         }
         // Recursion tests are done in the analyseObject and
@@ -225,6 +236,8 @@ class Objects {
         if ($ref_property->isStatic()) {
           $additional .= 'static ';
           $connector1 = '::';
+          // There is always a $ in front of a static property.
+          $prop_name = '$' . $prop_name;
         }
 
         // Object?
@@ -308,11 +321,11 @@ class Objects {
     // any "abstraction level", because they can be accessed directly.
     if (strpos(strtoupper($label), 'PUBLIC') === FALSE) {
       // Protected or private properties.
-      return View\Render::renderExpandableChild($label, 'class internals', $anon_function, $parameter, '', '', '', FALSE, '', '');
+      return View\SkinRender::renderExpandableChild($label, 'class internals', $anon_function, $parameter, '', '', '', FALSE, '', '');
     }
     else {
       // Public properties.
-      return View\Render::renderExpandableChild('', '', $anon_function, $parameter, $label);
+      return View\SkinRender::renderExpandableChild('', '', $anon_function, $parameter, $label);
     }
   }
 
@@ -337,7 +350,7 @@ class Objects {
       // Recursion detection of objects are
       // handled in the hub.
       if (is_array($data) && Hive::isInHive($data)) {
-        return View\Render::renderRecursion();
+        return View\SkinRender::renderRecursion();
       }
 
       // Remember, that we've already been here.
@@ -367,11 +380,11 @@ class Objects {
           $v = &$data[$k];
         }
 
-        $output .= Internals::analysisHub($v, $k);
+        $output .= Variables::analysisHub($v, $k);
       }
       return $output;
     };
-    return View\Render::renderExpandableChild('', '', $analysis, $parameter);
+    return View\SkinRender::renderExpandableChild('', '', $analysis, $parameter);
   }
 
   /**
@@ -391,14 +404,15 @@ class Objects {
     $protected = array();
     $private = array();
     $ref = new \ReflectionClass($data);
-    if (Framework\Config::getConfigValue('methods', 'analysePublicMethods') == 'true') {
+    if (Framework\Config::getConfigValue('methods', 'analyseMethodsAtall') == 'true') {
       $public = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
-    }
-    if (Framework\Config::getConfigValue('methods', 'analyseProtectedMethods') == 'true') {
-      $protected = $ref->getMethods(\ReflectionMethod::IS_PROTECTED);
-    }
-    if (Framework\Config::getConfigValue('methods', 'analysePrivateMethods') == 'true') {
-      $private = $ref->getMethods(\ReflectionMethod::IS_PRIVATE);
+
+      if (Framework\Config::getConfigValue('methods', 'analyseProtectedMethods') == 'true' || Internals::isInScope()) {
+        $protected = $ref->getMethods(\ReflectionMethod::IS_PROTECTED);
+      }
+      if (Framework\Config::getConfigValue('methods', 'analysePrivateMethods') == 'true' || Internals::isInScope()) {
+        $private = $ref->getMethods(\ReflectionMethod::IS_PRIVATE);
+      }
     }
 
     // Is there anything to analyse?
@@ -415,7 +429,7 @@ class Objects {
         return Objects::analyseMethods($parameter[0], $parameter[1]);
       };
 
-      return View\Render::renderExpandableChild('Methods', 'class internals', $anon_function, $parameter, '', '', '', FALSE, '', '');
+      return View\SkinRender::renderExpandableChild('Methods', 'class internals', $anon_function, $parameter);
     }
     return '';
   }
@@ -435,10 +449,24 @@ class Objects {
     if (is_a($data, 'Traversable')) {
       $parameter = iterator_to_array($data);
       $anon_function = function (&$data) {
-        // This could be anything, we need to examine it first.
-        return Internals::analysisHub($data);
+        // This should be an array. Giving it directly to the analysis hub would
+        // create another useless nest.
+        return Variables::iterateThrough($data);
       };
-      return View\Render::renderExpandableChild($name, 'Foreach', $anon_function, $parameter, 'Traversable Info');
+      // If we are facing a IteratorAggregate, we can not access the array
+      // directly. To do this, we must get the Iterator from the class.
+      // For our analysis is it not really important, because it does not
+      // change anything. We need this for the automatic code generation.
+      if (is_a($data, 'IteratorAggregate')) {
+        $connector2 = '->getIterator()';
+        // Remove the name, because this would then get added to the source
+        // generation, resulting in unusable code.
+        $name = '';
+      }
+      else {
+        $connector2 = '';
+      }
+      return View\SkinRender::renderExpandableChild($name, 'Foreach', $anon_function, $parameter, 'Traversable Info', '', '', FALSE, '', $connector2);
     }
     return '';
   }
@@ -453,13 +481,11 @@ class Objects {
    *
    * @param object $data
    *   The object we are analysing.
-   * @param string $name
-   *   The name of the object we are analysing.
    *
    * @return string
    *   The generated markup.
    */
-  public static function pollAllConfiguredDebugMethods($data, $name) {
+  public static function pollAllConfiguredDebugMethods($data) {
     $output = '';
 
     $func_list = explode(',', Framework\Config::getConfigValue('deep', 'debugMethods'));
@@ -469,26 +495,54 @@ class Objects {
           $func_name,
         )) && Framework\config::isAllowedDebugCall($data, $func_name)
       ) {
-        // Add a try to prevent the hosting CMS from doing something stupid.
-        try {
-          // We need to deactivate the current error handling to
-          // prevent the host system to do anything stupid.
-          set_error_handler(function () {
+        $found_required = FALSE;
+        // We need to check if this method actually exists. Just because it is
+        // callable does not mean it exists!
+        if (method_exists($data, $func_name)) {
+          // We need to check if the callable function requires any parameters.
+          // We will not call those, because we simply can not provide them.
+          // Interestingly, some methods of a class are callable, but are not
+          // implemented. This means, that when I try to get a reflection,
+          // it will result in a WSOD.
+          $ref = new \ReflectionMethod($data, $func_name);
+          $params = $ref->getParameters();
+          foreach ($params as $param) {
+            if (!$param->isOptional()) {
+              // We've got a required parameter!
+              // We will not call this one.
+              $found_required = TRUE;
+            }
+          }
+          unset($ref);
+        }
+        else {
+          // It's callable, but does not exist. Looks like a __call fallback.
+          // We will not poll it for data.
+          $found_required = TRUE;
+        }
+
+        if ($found_required == FALSE) {
+          // Add a try to prevent the hosting CMS from doing something stupid.
+          try {
+            // We need to deactivate the current error handling to
+            // prevent the host system to do anything stupid.
+            set_error_handler(function () {
+              // Do nothing.
+            });
+            $result = $data->$func_name();
+            // Reactivate whatever error handling we had previously.
+            restore_error_handler();
+          }
+          catch (\Exception $e) {
             // Do nothing.
-          });
-          $parameter = $data->$func_name();
-          // Reactivate whatever error handling we had previously.
-          restore_error_handler();
-        }
-        catch (\Exception $e) {
-          // Do nothing.
-        }
-        if (isset($parameter)) {
-          $anon_function = function (&$parameter) {
-            return Internals::analysisHub($parameter);
-          };
-          $output .= View\Render::renderExpandableChild($func_name, 'debug method', $anon_function, $parameter, '. . .', '', '', FALSE, '->', '() =');
-          unset($parameter);
+          }
+          if (isset($result)) {
+            $anon_function = function (&$result) {
+              return Variables::analysisHub($result);
+            };
+            $output .= View\SkinRender::renderExpandableChild($func_name, 'debug method', $anon_function, $result, '. . .', '', $func_name, FALSE, '->', '() =');
+            unset($result);
+          }
         }
       }
     }
@@ -513,10 +567,10 @@ class Objects {
       $output = '';
       foreach ($data as $key => $string) {
         if ($key !== 'comments' && $key !== 'declared in') {
-          $output .= View\Render::renderSingleChild($string, $key, $string, FALSE, 'reflection', '', '', '', '=');
+          $output .= View\SkinRender::renderSingleChild($string, $key, $string, 'reflection', '', '', '=');
         }
         else {
-          $output .= View\Render::renderSingleChild($string, $key, '. . .', TRUE, 'reflection', '', '', '', '=');
+          $output .= View\SkinRender::renderSingleChild($string, $key, '. . .', 'reflection', '', '', '=');
         }
       }
       return $output;
@@ -540,7 +594,7 @@ class Objects {
     // Remove the ',' after the last char.
     $param_list = '<small>' . trim($param_list, ', ') . '</small>';
 
-    return View\Render::renderExpandableChild($name, $data['declaration keywords'] . ' method', $anon_function, $parameter, '', '', '', FALSE, $connector1, '(' . $param_list . ')');
+    return View\SkinRender::renderExpandableChild($name, $data['declaration keywords'] . ' method', $anon_function, $parameter, '', '', '', FALSE, $connector1, '(' . $param_list . ')');
   }
 
   /**
@@ -592,16 +646,16 @@ class Objects {
       $output = '';
       foreach ($data as $key => $string) {
         if ($key !== 'comments' && $key !== 'declared in') {
-          $output .= View\Render::renderSingleChild($string, $key, $string, FALSE, 'reflection', '', '', '', '=');
+          $output .= View\SkinRender::renderSingleChild($string, $key, $string, 'reflection', '', '', '=');
         }
         else {
-          $output .= View\Render::renderSingleChild($string, $key, '. . .', TRUE, 'reflection', '', '', '', '=');
+          $output .= View\SkinRender::renderSingleChild($string, $key, '. . .', 'reflection', '', '', '=');
         }
       }
       return $output;
     };
 
-    return View\Render::renderExpandableChild($prop_name, $additional . ' closure', $anon_function, $result, '', '', '', FALSE, $connector1, $connector2 . '(' . $param_list . ') =');
+    return View\SkinRender::renderExpandableChild($prop_name, $additional . ' closure', $anon_function, $result, '', '', '', FALSE, $connector1, $connector2 . '(' . $param_list . ') =');
 
   }
 

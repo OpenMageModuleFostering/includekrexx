@@ -295,12 +295,12 @@
       <th colspan="4"><b>Methods</b></th>
     </tr>
     <tr>
-      <td class=""><label for="analysePublicMethods">Analyse public methods:</label></td>
-      <td class=""><div class="link-store-scope" title="<?php echo $help['analysePublicMethods']; ?>"></div></td>
+      <td class=""><label for="analyseMethodsAtall">Analyse class methods at all:</label></td>
+      <td class=""><div class="link-store-scope" title="<?php echo $help['analyseMethodsAtall']; ?>"></div></td>
       <td class="">
-         <select name="methods[analysePublicMethods]" id="analysePublicMethods">
+         <select name="methods[analyseMethodsAtall]" id="analyseMethodsAtall">
           <?php foreach($this->getSelectBool() as $key => $value) {
-                if ($value == $settings['methods']['analysePublicMethods']) {
+                if ($value == $settings['methods']['analyseMethodsAtall']) {
                   $selected = 'selected="selected"';
                 }
                 else {
@@ -312,12 +312,12 @@
         </select>
       </td>
       <td class="">
-        <input id="factory.analysePublicMethods" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analysePublicMethods']; ?>/>
-        <label for="factory.analysePublicMethods">Use factory settings</label>
+        <input id="factory.analyseMethodsAtall" class="checkbox" type="checkbox" value="1" name="factory" <?php echo $factory['analyseMethodsAtall']; ?>/>
+        <label for="factory.analyseMethodsAtall">Use factory settings</label>
       </td>
     </tr>
     <tr>
-      <td class=""><label for="analyseProtectedMethods">Analyse protected methods:</label></td>
+      <td class=""><label for="analyseProtectedMethods">Analyse protected class methods:</label></td>
       <td class=""><div class="link-store-scope" title="<?php echo $help['analyseProtectedMethods']; ?>"></div></td>
       <td class="">
         <select name="methods[analyseProtectedMethods]" id="analyseProtectedMethods">
@@ -339,7 +339,7 @@
       </td>
     </tr>
     <tr>
-      <td class=""><label for="analysePrivateMethods">Analyse private methods:</label></td>
+      <td class=""><label for="analysePrivateMethods">Analyse private class methods:</label></td>
       <td class=""><div class="link-store-scope" title="<?php echo $help['analysePrivateMethods']; ?>"></div></td>
       <td class="">
         <select name="methods[analysePrivateMethods]" id="analysePrivateMethods">
