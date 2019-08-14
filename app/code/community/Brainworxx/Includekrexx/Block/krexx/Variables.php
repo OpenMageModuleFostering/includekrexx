@@ -1,19 +1,34 @@
 <?php
 /**
  * @file
- * Variables analysis functions for kreXX
- * kreXX: Krumo eXXtended
+ *   Variables analysis functions for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * kreXX is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   kreXX is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
@@ -30,13 +45,17 @@ class Variables {
    *
    * @param string $name
    *   The Name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseNull($name) {
+  public Static Function analyseNull($name, $additional = '', $connector = '=>') {
     $data = 'NULL';
-    return Render::renderSingleChild($data, $name, $data, FALSE, 'null');
+    return Render::renderSingleChild($data, $name, $data, FALSE, $additional . 'null', '', '', $connector);
   }
 
   /**
@@ -46,19 +65,23 @@ class Variables {
    *   The data we are analysing.
    * @param string $name
    *   The name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseArray(array &$data, $name) {
+  public Static Function analyseArray(array &$data, $name, $additional = '', $connector = '=>') {
     // Dumping all Properties.
     $parameter = array($data);
     $anon_function = function ($parameter) {
       $data = $parameter[0];
-      return Internals::interateThrough($data);
+      return Internals::iterateThrough($data);
     };
 
-    return Render::renderExpandableChild($name, 'array', $anon_function, $parameter, count($data) . ' elements');
+    return Render::renderExpandableChild($name, $additional . 'array', $anon_function, $parameter, count($data) . ' elements', '', '', FALSE, $connector);
   }
 
   /**
@@ -68,13 +91,17 @@ class Variables {
    *   The data we are analysing.
    * @param string $name
    *   The name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseResource($data, $name) {
+  public Static Function analyseResource($data, $name, $additional = '', $connector = '=>') {
     $data = get_resource_type($data);
-    return Render::renderSingleChild($data, $name, $data, FALSE, 'resource');
+    return Render::renderSingleChild($data, $name, $data, FALSE, $additional . 'resource', '', '', $connector);
   }
 
   /**
@@ -84,13 +111,17 @@ class Variables {
    *   The data we are analysing.
    * @param string $name
    *   The name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseBoolean($data, $name) {
+  public Static Function analyseBoolean($data, $name, $additional = '', $connector = '=>') {
     $data = $data ? 'TRUE' : 'FALSE';
-    return Render::renderSingleChild($data, $name, $data, FALSE, 'boolean');
+    return Render::renderSingleChild($data, $name, $data, FALSE, $additional . 'boolean', '', '', $connector);
   }
 
   /**
@@ -100,12 +131,16 @@ class Variables {
    *   The data we are analysing.
    * @param string $name
    *   The name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseInteger($data, $name) {
-    return Render::renderSingleChild($data, $name, $data, FALSE, 'integer');
+  public Static Function analyseInteger($data, $name, $additional = '', $connector = '=>') {
+    return Render::renderSingleChild($data, $name, $data, FALSE, $additional . 'integer', '', '', $connector);
   }
 
   /**
@@ -115,12 +150,16 @@ class Variables {
    *   The data we are analysing.
    * @param string $name
    *   The name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseFloat($data, $name) {
-    return Render::renderSingleChild($data, $name, $data, FALSE, 'float');
+  public Static Function analyseFloat($data, $name, $additional = '', $connector = '=>') {
+    return Render::renderSingleChild($data, $name, $data, FALSE, $additional . 'float', '', '', $connector);
   }
 
   /**
@@ -130,11 +169,15 @@ class Variables {
    *   The data we are analysing.
    * @param string $name
    *   The name, what we render here.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The rendered markup.
    */
-  public Static Function analyseString($data, $name) {
+  public Static Function analyseString($data, $name, $additional = '', $connector = '=>') {
 
     // Extra ?
     $has_extra = FALSE;
@@ -155,7 +198,7 @@ class Variables {
       $strlen = ' mixed encoded ~ ' . strlen($data);
     }
 
-    return Render::renderSingleChild($clean_data, $name, $cut, $has_extra, 'string', ' ' . $strlen);
+    return Render::renderSingleChild($clean_data, $name, $cut, $has_extra, $additional . 'string', ' ' . $strlen, '', $connector);
   }
 
   /**
@@ -168,7 +211,7 @@ class Variables {
    * @param bool $code
    *   Do we need to format the string as code?
    *
-   * @return string The encoded string.
+   * @return string
    *   The encoded string.
    */
   public static function encodeString($data, $code = FALSE) {

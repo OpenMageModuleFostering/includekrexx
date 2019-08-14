@@ -1,19 +1,34 @@
 <?php
 /**
  * @file
- * Object analysis functions for kreXX
- * kreXX: Krumo eXXtended
+ *   Object analysis functions for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
@@ -32,11 +47,15 @@ class Objects {
    *   The object we want to analyse.
    * @param string $name
    *   The name of the object.
+   * @param string $additional
+   *   Information about thedeclaration in the parent class / array.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The generated markup.
    */
-  public Static Function analyseObject($data, $name) {
+  public Static Function analyseObject($data, $name, $additional = '', $connector = '=>') {
     static $level = 0;
 
     $output = '';
@@ -46,7 +65,7 @@ class Objects {
     if (Hive::isInHive($data)) {
       // Tell them, we've been here before
       // but also say who we are.
-      $output .= Render::renderRecursion($name, get_class($data), Toolbox::generateDomIdFromObject($data));
+      $output .= Render::renderRecursion($name, get_class($data), Toolbox::generateDomIdFromObject($data), $connector);
 
       // We will not render this one, but since we
       // return to wherever we came from, we need to decrese the level.
@@ -61,30 +80,43 @@ class Objects {
       $name = $parameter[1];
       $output = '';
 
-      // Dumping all Properties
-      // But only if we have any.
-      if (count(get_object_vars($data))) {
-        $parameter = array($data);
-        $anon_function = function (&$parameter) {
-          $data = $parameter[0];
-          // Standard dump of the vars.
-          return Internals::interateThrough($data);
-        };
-        $output .= Render::renderExpandableChild($name, 'class internals', $anon_function, $parameter, 'Public properties');
+      $ref = new \ReflectionClass($data);
+
+      // Dumping public properties.
+      $ref_props = $ref->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+      // Adding undeclared public properties to the dump.
+      // Those are properties which are not visible with
+      // $ref->getProperties(\ReflectionProperty::IS_PUBLIC);
+      // but can are in get_object_vars();
+      // 1. Make a list of all properties
+      // 2. Remove those that are listed in
+      // $ref->getProperties(\ReflectionProperty::IS_PUBLIC);
+      // What is left are those special properties that were dynamically
+      // set during runtime, but were not declared in the class.
+      foreach ($ref_props as $ref_prop) {
+        $public_props[$ref_prop->name] = $ref_prop->name;
+      }
+      foreach (get_object_vars($data) as $key => $value) {
+        if (!isset($public_props[$key])) {
+          $ref_props[] = new Flection($value, $key);
+        }
+      }
+      if (count($ref_props)) {
+         $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Public properties');
       }
 
-      // Dumping all protected properties.
+
+      // Dumping protected properties.
       if (Config::getConfigValue('deep', 'analyseProtected') == 'true') {
-        $ref = new \ReflectionClass($data);
         $ref_props = $ref->getProperties(\ReflectionProperty::IS_PROTECTED);
         if (count($ref_props)) {
           $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Protected properties');
         }
       }
 
-      // Dumping all private properties.
+      // Dumping private properties.
       if (Config::getConfigValue('deep', 'analysePrivate') == 'true') {
-        $ref = new \ReflectionClass($data);
         $ref_props = $ref->getProperties(\ReflectionProperty::IS_PRIVATE);
         if (count($ref_props)) {
           $output .= Objects::getReflectionPropertiesData($ref_props, $name, $ref, $data, 'Private properties');
@@ -107,7 +139,7 @@ class Objects {
 
 
     // Output data from the class.
-    $output .= Render::renderExpandableChild($name, 'class', $anon_function, $parameter, get_class($data), Toolbox::generateDomIdFromObject($data));
+    $output .= Render::renderExpandableChild($name, $additional . 'class', $anon_function, $parameter, get_class($data), Toolbox::generateDomIdFromObject($data), '', FALSE, $connector);
     // We've finished this one, and can decrease the levelsetting.
     $level--;
     return $output;
@@ -133,27 +165,176 @@ class Objects {
   public static function getReflectionPropertiesData(array $ref_props, $name, \ReflectionClass $ref, $data, $label) {
     // I need to preprocess them, since I do not want to render a
     // reflection property.
-    $default = $ref->getDefaultProperties();
-    $private_props = array();
-    foreach ($ref_props as $ref_property) {
-      $ref_property->setAccessible(TRUE);
-      $value = $ref_property->getValue($data);
-      $prop_name = $ref_property->name;
-      if (is_null($value)) {
-        // No Value is set?
-        // We might want to look at the default value.
-        $value = $default[$prop_name];
-      }
-      $private_props[$prop_name] = $value;
-    }
-
-    $parameter = array($private_props);
+    $parameter = array($ref_props, $ref, $data);
     $anon_function = function (&$parameter) {
-      $data = $parameter[0];
-      // Standard dump of the vars.
-      return Internals::interateThrough($data);
+      $ref_props = $parameter[0];
+      $ref = $parameter[1];
+      $org_object = $parameter[2];
+      $output = '';
+      $default = $ref->getDefaultProperties();
+
+      foreach ($ref_props as $ref_property) {
+        $ref_property->setAccessible(TRUE);
+
+        // Getting our values from the reflection.
+        $value = $ref_property->getValue($org_object);
+        $prop_name = $ref_property->name;
+        if (is_null($value) && $ref_property->isDefault()) {
+          // We might want to look at the default value.
+          $value = $default[$prop_name];
+        }
+
+        // Check memory and runtime.
+        if (!Internals::checkEmergencyBreak()) {
+          // No more took too long, or not enough memory is left.
+          Messages::addMessage("Emergency break for large output during rendering process.\n\nYou should try to switch to file output.");
+          return '';
+        }
+        // Recursion tests are done in the analyseObject and
+        // iterateThrough (for arrays).
+        // We will not check them here.
+        // Now that we have the key and the value, we can analyse it.
+        // Stitch together our additional infos about the data:
+        // public, protected, private, static.
+        $additional = '';
+        $connector = '->';
+        if ($ref_property->isPublic()) {
+          $additional .= 'public ';
+        }
+        if ($ref_property->isPrivate()) {
+          $additional .= 'private ';
+        }
+        if ($ref_property->isProtected()) {
+          $additional .= 'protected ';
+        }
+        if (is_a($ref_property, '\Krexx\Flection')) {
+          $additional .= $ref_property->getWhatAmI() . ' ';
+        }
+        if ($ref_property->isStatic()) {
+          $additional .= 'static ';
+          $connector = '::';
+        }
+
+        // Object?
+        if (is_object($value)) {
+          Internals::$nestingLevel++;
+          if (Internals::$nestingLevel <= (int) Config::getConfigValue('deep', 'level')) {
+            $result = Objects::analyseObject($value, $prop_name, $additional, $connector);
+            Internals::$nestingLevel--;
+            $output .= $result;
+          }
+          else {
+            Internals::$nestingLevel--;
+            $output .= Variables::analyseString("Object => Maximum for analysis reached. I will not go any further.\n To increase this value, change the deep => level setting.", $prop_name, $additional, $connector);
+          }
+        }
+
+        // Array?
+        if (is_array($value)) {
+          Internals::$nestingLevel++;
+          if (Internals::$nestingLevel <= (int) Config::getConfigValue('deep', 'level')) {
+            $result = Variables::analyseArray($value, $prop_name, $additional, $connector);
+            Internals::$nestingLevel--;
+            $output .= $result;
+          }
+          else {
+            Internals::$nestingLevel--;
+            $output .= Variables::analyseString("Array => Maximum for analysis reached. I will not go any further.\n To increase this value, change the deep => level setting.", $prop_name, $additional, $connector);
+          }
+        }
+
+        // Resource?
+        if (is_resource($value)) {
+          $output .= Variables::analyseResource($value, $prop_name, $additional, $connector);
+        }
+
+        // String?
+        if (is_string($value)) {
+          $output .= Variables::analyseString($value, $prop_name, $additional, $connector);
+        }
+
+        // Float?
+        if (is_float($value)) {
+          $output .= Variables::analyseFloat($value, $prop_name, $additional, $connector);
+        }
+
+        // Integer?
+        if (is_int($value)) {
+          $output .= Variables::analyseInteger($value, $prop_name, $additional, $connector);
+        }
+
+        // Boolean?
+        if (is_bool($value)) {
+          $output .= Variables::analyseBoolean($value, $prop_name, $additional, $connector);
+        }
+
+        // Null ?
+        if (is_null($value)) {
+          $output .= Variables::analyseNull($prop_name, $additional, $connector);
+        }
+      }
+
+      return $output;
     };
     return Render::renderExpandableChild($name, 'class internals', $anon_function, $parameter, $label);
+  }
+
+  /**
+   * Render a dump for the properties of an array or object.
+   *
+   * @param array|object &$data
+   *   The object or array we want to analyse.
+   *
+   * @return string
+   *   The generated markup.
+   */
+  public Static Function iterateThroughReferenceProperties(&$data) {
+    $parameter = array($data);
+    $analysis = function (&$parameter) {
+      $output = '';
+      $data = $parameter[0];
+      $is_object = is_object($data);
+
+      $recursion_marker = Hive::getMarker();
+
+      // Recursion detection of objects are
+      // handeld in the hub.
+      if (is_array($data) && Hive::isInHive($data)) {
+        return Render::renderRecursion();
+      }
+
+      // Remember, that we've already been here.
+      Hive::addToHive($data);
+
+      // Keys?
+      if ($is_object) {
+        $keys = array_keys(get_object_vars($data));
+      }
+      else {
+        $keys = array_keys($data);
+      }
+
+      // Itterate through.
+      foreach ($keys as $k) {
+
+        // Skip the recursion marker.
+        if ($k === $recursion_marker) {
+          continue;
+        }
+
+        // Get real value.
+        if ($is_object) {
+          $v = & $data->$k;
+        }
+        else {
+          $v = & $data[$k];
+        }
+
+        $output .= Internals::analysisHub($v, $k);
+      }
+      return $output;
+    };
+    return Render::renderExpandableChild('', '', $analysis, $parameter);
   }
 
   /**
@@ -199,6 +380,7 @@ class Objects {
 
       return Render::renderExpandableChild($name, 'class internals', $anon_function, $parameter, 'Methods');
     }
+    return '';
   }
 
   /**
@@ -221,6 +403,7 @@ class Objects {
       };
       return Render::renderExpandableChild($name, 'Foreach', $anon_function, $parameter, 'Traversable Info');
     }
+    return '';
   }
 
   /**
@@ -244,7 +427,7 @@ class Objects {
 
     $func_list = explode(',', Config::getConfigValue('deep', 'debugMethods'));
     foreach ($func_list as $func_name) {
-      if (is_callable(array($data, $func_name))) {
+      if (is_callable(array($data, $func_name)) && config::isAllowedDebugCall($data, $func_name)) {
         // Add a try to prevent the hosting CMS from doing something stupid.
         try {
           $args = array();
@@ -254,7 +437,7 @@ class Objects {
             // Do nothing.
           });
           $parameter = $data->$func_name($args);
-          // Reactivate whatever errorhandling we had previously.
+          // Reactivate whatever error handling we had previously.
           restore_error_handler();
         }
         catch (\Exception $e) {
@@ -331,9 +514,15 @@ class Objects {
         $method_data['comments'] = Variables::encodeString($method_data['comments'], TRUE);
         // Get declaration place.
         $declaring_class = $reflection->getDeclaringClass();
-        $method_data['declared in'] = htmlspecialchars($declaring_class->getFileName()) . '<br/>';
-        $method_data['declared in'] .= htmlspecialchars($declaring_class->getName()) . ' ';
-        $method_data['declared in'] .= 'in line ' . htmlspecialchars($reflection->getStartLine());
+        if (is_null($declaring_class->getFileName()) || $declaring_class->getFileName() == '') {
+          $method_data['declared in'] = ':: unable to determine declaration::<br/><br/>Maybe this is a predeclared class?';
+        }
+        else {
+          $method_data['declared in'] = htmlspecialchars($declaring_class->getFileName()) . '<br/>';
+          $method_data['declared in'] .= htmlspecialchars($declaring_class->getName()) . ' ';
+          $method_data['declared in'] .= 'in line ' . htmlspecialchars($reflection->getStartLine());
+        }
+
         // Get parameters.
         $parameters = $reflection->getParameters();
         foreach ($parameters as $parameter) {
@@ -531,7 +720,7 @@ class Objects {
       else {
         // Wrong PHP version. Traits are not available.
         // Maybe there is something in the interface?
-        return $original_comment;;
+        return $original_comment;
       }
     }
     else {

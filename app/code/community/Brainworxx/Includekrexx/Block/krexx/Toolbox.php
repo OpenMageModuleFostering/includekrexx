@@ -1,19 +1,34 @@
 <?php
 /**
  * @file
- * Toolbox functions for kreXX
- * kreXX: Krumo eXXtended
+ *   Toolbox functions for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
@@ -72,7 +87,6 @@ class Toolbox {
    *   TRUE when this is AJAX, FALSE if not
    */
   public static function isRequestAjaxOrCli() {
-    $result = FALSE;
 
     if (Config::getConfigValue('output', 'destination') != 'file') {
       // When we are not going to create a logfile, we send it to the browser.
@@ -183,7 +197,6 @@ class Toolbox {
       $config_output .= Render::renderSingleEditableChild('Local open function', Config::getDevHandler(), '\krexx::', 'Input', 'localFunction');
       // Render the reset-button which will delete the debug-cookie.
       $config_output .= Render::renderButton('resetbutton', 'Reset local settings', 'resetbutton');
-      $config_output .= Render::renderButton('debugcookie', 'Toggle debug cookie', 'debugcookie');
       return $config_output;
     };
 
@@ -258,6 +271,7 @@ class Toolbox {
     }
     else {
       // Do nothing.
+      return '';
     }
   }
 
@@ -408,12 +422,13 @@ class Toolbox {
       $type = 'Stack Frame';
       $parameter = $step_data;
       $anon_function = function($parameter){
-        // We are handeling the following values here:
+        $output = '';
+        // We are handling the following values here:
         // file, line, function, object, type, args, sourcecode.
         $step_data = $parameter;
         // File.
         if (isset($step_data['file'])) {
-          $output = \Krexx\Render::renderSingleChild($step_data['file'], 'File', $step_data['file'], FALSE, 'string ', strlen($step_data['file']));
+          $output .= \Krexx\Render::renderSingleChild($step_data['file'], 'File', $step_data['file'], FALSE, 'string ', strlen($step_data['file']));
         }
         // Line.
         if (isset($step_data['line'])) {

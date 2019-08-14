@@ -1,19 +1,34 @@
 <?php
 /**
  * @file
- * Helptexts for kreXX
- * kreXX: Krumo eXXtended
+ *   Helptexts for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
@@ -36,7 +51,6 @@ class Help {
     'level' => 'Some frameworks have objects inside of objects inside of objects, and so on.<br/> Normally kreXX does not run in circles, but going to deep inside of an object tree can result in a lot of output. ',
     'resetbutton' => 'Here you can reset your local settings, which are stored in a cookie.<br/> kreXX will then use the global settings (either ini-file or factory settings).' ,
     'destination' => 'kreXX can save it\'s output to a file, instead of outputting it to the frontend.<br/> The output will then be stored in the log folder.',
-    'useCookies' => 'You might want to hide kreXX from some project members. Web designers might not want to see it\'s output,<br/> especially when a lot of HTML markup is created (not to mention the delay). kreXX is not only hidden,<br/> it simply will not execute, when this option is used and you do not have a debug cookie in your browser.<br/> To get a debug cookie, please use the "Toggle debug cookie" button on the buttom.',
     'maxCall' => 'A lot of output does not only slow down your server, it also slows down your browser. When using kreXX in a loop,<br/> it will create output every time the loop is executed. To limit this, you can configure the maximum call settings.',
     'disabled' => 'Here you can disable kreXX. Note that this is just a local setting, it does not affect other browsers.',
     'folder' => 'This is the folder where kreXX will store it\'s logfiles.',
@@ -44,15 +58,15 @@ class Help {
     'skin' => 'Choose a skin here. We have provided kreXX with two skins: "schablon" and "hans".',
     'jsLib' => 'kreXX uses in the frontend jQuery. We have bundled it with jQuery 1.11.0, but it may interfere<br/> with the library that you use. To use your own libs, you can point kreXX to your jQuery file.<br /> Entering an empty value will prevent kreXX from loading any library.',
     'currentSettings' => 'kreXX\'s configuration can be edited here, changes will be stored in a cookie and overwrite the ini and factory settings.<br/> <strong>Please note, that these are only local settings. They only affect this browser.</strong>',
-    'debugcookie' => 'Here you can toggle your debug cookie. This only works with the "useCookies" function above.',
     'registerAutomatically' => 'This option registers the fatal errorhandler as soon as kreXX is included. When a fatal error occures,<br/> kreXX will offer a backtrace and an analysis of the all objects in it. PHP always clears the stack in case of a fatal error,<br/> so kreXX has to keep track of it. <strong>Be warned:</strong> This option will dramatically slow down your requests. Use this only when you have to.<br/> It is by far better to register the errorhandler yourself with <strong>\krexx::registerFatal();</strong> and later unregister it<br/> with <strong>\krexx::unregisterFatal();</strong> tp prevent a slowdown.',
     'detectAjax' => 'kreXX tries to detect whether a request is made via ajax. When it is detected, it will do no output at all. The AJAX detection can be disabled here.',
     'backtraceAnalysis' => 'Shall kreXX do a "deep" analysis of  the backtrace? Be warned, a deep analysis can produce a lot of output.<br/> A "normal" analysis will use the configured settings, while a "deep" analysis will get as much data from the objects as possible.',
-    'memoryLeft' => 'kreXX checks regularely how much memory is left. Here you can adjust the amount where it will trigger an emergengy break.<br />Unit of measurement is MB.',
+    'memoryLeft' => 'kreXX checks regularly how much memory is left. Here you can adjust the amount where it will trigger an emergengy break.<br />Unit of measurement is MB.',
     'maxRuntime' => 'kreXX checks during the analysis how much time has elapsed since start. Here you can adjust the amount where it will trigger an emergengy break.<br />Unit of measurement is seconds.',
     'analysePublicMethods' => 'Here you can toggle if kreXX shall analyse the public methods of a class.',
     'analyseProtectedMethods' => 'Here you can toggle if kreXX shall analyse the protected methods of a class.',
     'analysePrivateMethods' => 'Here you can toggle if kreXX shall analyse the private methods of a class.',
+    'hiddenInternal' => 'These are unreachable internal properties of predefined classes in PHP.<br /> @see: https://bugs.php.net/bug.php?id=49382',
   );
 
   /**

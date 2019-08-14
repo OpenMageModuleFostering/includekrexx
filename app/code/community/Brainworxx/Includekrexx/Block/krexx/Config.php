@@ -1,19 +1,34 @@
 <?php
 /**
  * @file
- * Configfunctions for kreXX
- * kreXX: Krumo eXXtended
+ *   Configfunctions for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
@@ -50,7 +65,6 @@ class Config {
     ),
     'output' => array(
       'destination' => 'frontend',
-      'useCookies' => 'false',
       'maxCall' => '10',
       'disabled' => 'false',
       'detectAjax' => 'true',
@@ -114,10 +128,6 @@ class Config {
       'type' => 'Select',
       'editable' => 'true',
     ),
-    'useCookies' => array(
-      'type' => 'None',
-      'editable' => 'false',
-    ),
     'destination' => array(
       'type' => 'Select',
       'editable' => 'true',
@@ -158,6 +168,28 @@ class Config {
       'type' => 'Input',
       'editable' => 'true',
     ),
+    'Local open function' => array(
+      'type' => 'Input',
+      'editable' => 'true',
+    ),
+  );
+
+  /**
+   * Known Problems with debug functions, which will most likely cause a fatal.
+   *
+   * Used by \Krexx\Objects::pollAllConfiguredDebugMethods() to determine
+   * if we might expect problems.
+   *
+   * @var array
+   */
+  protected static $debugMethodsBlacklist = array(
+
+    // Typo3 viewhelpers dislike this function.
+    // In the TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper the private
+    // $viewHelperNode might not be an object, and trying to render it might
+    // cause a fatal error!
+    'TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper' => '__toString',
+
   );
 
   /**
@@ -189,7 +221,7 @@ class Config {
   public Static Function isEnabled($state = NULL, $ignore_local_settings = FALSE) {
 
     // Enable kreXX.
-    if (isset($state)) {
+    if (!is_null($state)) {
       self::$isEnabled = $state;
       return self::$isEnabled;
     }
@@ -203,24 +235,6 @@ class Config {
     // Check for ajax and cli.
     if (Toolbox::isRequestAjaxOrCli()) {
       return FALSE;
-    }
-
-    // Are we using Debug cookies?
-    if (Config::getConfigValue('output', 'useCookies', $ignore_local_settings) == 'true') {
-      $krexx_debug = getConfigFromCookies('', 'KrexxDebug');
-      if (is_null($krexx_debug) && $krexx_debug == 'yes') {
-        $debug_session = TRUE;
-      }
-      else {
-        $debug_session = FALSE;
-      }
-
-      if ($debug_session === TRUE && self::$isEnabled === TRUE) {
-        return TRUE;
-      }
-      else {
-        return FALSE;
-      }
     }
 
     return self::$isEnabled;
@@ -252,7 +266,7 @@ class Config {
       $local_setting = self::getConfigFromCookies($group, $name);
       if (isset($local_setting)) {
         // We must not overwrite a disabled=true with local cookie settings!
-        // Otherwise it couldget enabled locally,
+        // Otherwise it could get enabled locally,
         // which might be a security issue.
         if ($name == 'disabled' && $local_setting == 'false') {
           // Do nothing.
@@ -268,12 +282,16 @@ class Config {
     // Do we have a value in the ini?
     $ini_settings = self::getConfigFromFile($group, $name);
     if (isset($ini_settings)) {
-      self::$localConfig[$group][$name] = $ini_settings;
+      if ($ignore_local_settings == FALSE) {
+        self::$localConfig[$group][$name] = $ini_settings;
+      }
       return $ini_settings;
     }
 
     // Nothing yet? Give back factory settings.
-    self::$localConfig[$group][$name] = self::$configFallback[$group][$name];
+    if ($ignore_local_settings == FALSE) {
+      self::$localConfig[$group][$name] = self::$configFallback[$group][$name];
+    }
     return self::$configFallback[$group][$name];
   }
 
@@ -329,7 +347,7 @@ class Config {
    * is also included. We need this one for the display
    * on the frontend.
    * We display here the invalid settings (if we have
-   * any,so the user can corrent it.
+   * any,so the user can correct it.
    *
    * @return array
    *   The configuration with the source.
@@ -345,6 +363,17 @@ class Config {
     // so the dev can correct them, in case there are wrong values.
     if (isset($_COOKIE['KrexxDebugSettings'])) {
       $cookie_config = json_decode($_COOKIE['KrexxDebugSettings'], TRUE);
+    }
+
+    // We must remove the cookie settings for which we do not accept
+    // any values. They might contain wrong values.
+    foreach ($cookie_config as $name => $data) {
+      $param_config = self::getFeConfig($name);
+      if ($param_config[0] === FALSE) {
+        // We act as if we have not found the value. Configurations that are
+        // not editable on the frontend will be ignored!
+        unset($cookie_config[$name]);
+      }
     }
 
     // Get Settings from the cookies. We do not valuate them,
@@ -438,6 +467,7 @@ class Config {
     if (isset($_config[$group][$name]) && self::evaluateSetting($group, $name, $_config[$group][$name])) {
       return $_config[$group][$name];
     }
+
   }
 
   /**
@@ -593,14 +623,6 @@ class Config {
           $result = self::evalBool($value);
           if (!$result) {
             Messages::addMessage('Wrong configuration for: "output => detectAjax"! Expected boolean. The configured setting was not applied!');
-          }
-          break;
-
-        case "useCookies":
-          // We expect a bool.
-          $result = self::evalBool($value);
-          if (!$result) {
-            Messages::addMessage('Wrong configuration for: "output => useCookies"! Expected boolean. The configured setting was not applied!');
           }
           break;
 
@@ -773,10 +795,6 @@ class Config {
             $type = 'Input';
             break;
 
-          case 'useCookies':
-            $type = 'Select';
-            break;
-
           default:
             // Nothing special, we get our value from the config class.
             $type = self::$feConfigFallback[$parameter_name]['type'];
@@ -870,7 +888,7 @@ class Config {
    *   The string we want to evaluate.
    *
    * @return bool
-   *   Weather it does evaluate or not.
+   *   Whether it does evaluate or not.
    */
   protected static function evalBool($value) {
     if ($value === 'true' || $value === 'false') {
@@ -890,7 +908,7 @@ class Config {
    *   The string we want to evaluate.
    *
    * @return bool
-   *   Weather it does evaluate or not.
+   *   Whether it does evaluate or not.
    */
   protected static function evalInt($value) {
     $value = (int) $value;
@@ -901,4 +919,28 @@ class Config {
       return FALSE;
     }
   }
+
+  /**
+   * Determines if a debug function is blacklisted in s specific class.
+   *
+   * @param object $data
+   *   The class we are analysing.
+   * @param string $call
+   *   The function name we want to call.
+   *
+   * @return bool
+   *   Whether the function is allowed to be called.
+   */
+  public static function isAllowedDebugCall($data, $call) {
+
+    foreach (self::$debugMethodsBlacklist as $classname => $method) {
+      if (is_a($data, $classname) && $call == $method) {
+        // We have a winner, this one is blacklisted!
+        return FALSE;
+      }
+    }
+    // Nothing found?
+    return TRUE;
+  }
+
 }

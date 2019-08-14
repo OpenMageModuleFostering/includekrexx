@@ -1,3 +1,26 @@
+1.3.2
+- Bugfix: Removed that annoying "Hidden internal properties"
+  message.
+- Bugfix /Feature: Added a small blacklist of classname/debugfunction
+  combination which may cause problems during object analysis.
+- Removed the old and ugly schablon skin.
+- Added composer.json
+
+1.3.1
+- Bugfix: Local open function is working again.
+- Bugfix: Displaying the local configuration does not
+  re-enable kreXX anymore.
+- Bugfix: Emergency break does not trigger a false positive
+  anymore.
+- Bugfix: Display of wrong values in the settings, in case
+  those settings are not editable and there are some leftover
+  values in the settings cookie.
+- Bugfix: Proper display of static values in objects.
+- Bugfix: Proper display of internal properties of predefined
+  php classes
+- Removed the Debug Cookie in favor for the local open
+  function
+
 1.3.0
 - Added search function to the Hans skin.
 - Added collapse-everything-else to the Hans skin.

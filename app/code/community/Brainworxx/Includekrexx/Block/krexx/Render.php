@@ -1,19 +1,34 @@
 <?php
 /**
  * @file
- * Renderfunctions for kreXX
- * kreXX: Krumo eXXtended
+ *   Renderfunctions for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
@@ -48,7 +63,7 @@ class Render extends Help {
    *   The version of kreXX.
    */
   Public Static Function version() {
-    return '1.3.0';
+    return '1.3.2';
   }
 
   /**
@@ -75,11 +90,13 @@ class Render extends Help {
    *   calles this one.
    * @param string $help_id
    *   The id of the helptext we want to display here.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
-   * @return string The generated markup from the template files.
-   * The generated markup from the template files.
+   * @return string
+   *   The generated markup from the template files.
    */
-  Public static function renderSingleChild($data, $name = '', $normal = '', $extra = FALSE, $type = '', $strlen = '', $help_id = '') {
+  Public static function renderSingleChild($data, $name = '', $normal = '', $extra = FALSE, $type = '', $strlen = '', $help_id = '', $connector = '=>') {
     // This one is a little bit more complicated than the others,
     // because it assembels some partials and stitches them together.
     $template = self::getTemplateFileContent('singleChild');
@@ -98,16 +115,26 @@ class Render extends Help {
       // Add the yellow box for large output text.
       $part_extra = self::getTemplateFileContent('singleChildExtra');
     }
+    // Stitching the classes together, depending on the types.
+    $type_array = explode(' ', $type);
+    $type_classes = '';
+    foreach ($type_array as $type_class) {
+      $type_class = 'k' . $type_class;
+      $type_classes .= $type_class .  ' ';
+    }
+
     // Stitching it together.
     $template = str_replace('{expand}', $part_expand, $template);
     $template = str_replace('{callable}', $part_callable, $template);
     $template = str_replace('{extra}', $part_extra, $template);
     $template = str_replace('{name}', $name, $template);
     $template = str_replace('{type}', $type, $template);
+    $template = str_replace('{type-classes}', $type_classes, $template);
     $template = str_replace('{strlen}', $strlen, $template);
     $template = str_replace('{normal}', $normal, $template);
     $template = str_replace('{data}', $data, $template);
     $template = str_replace('{help}', self::renderHelp($help_id), $template);
+    $template = str_replace('{connector}', $connector, $template);
     return $template;
   }
 
@@ -123,17 +150,19 @@ class Render extends Help {
    *   We might want to tell the user what this actually is.
    * @param string $dom_id
    *   The id of the analysis data, a click on the recursion should jump to it.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
    * @return string
    *   The generated markup from the template files.
    */
-  Public Static Function renderRecursion($name = '', $value = '', $dom_id = '') {
+  Public Static Function renderRecursion($name = '', $value = '', $dom_id = '', $connector = '=>') {
     $template = self::getTemplateFileContent('recursion');
     // Replace our stuff in the partial.
     $template = str_replace('{name}', $name, $template);
     $template = str_replace('{domId}', $dom_id, $template);
     $template = str_replace('{value}', $value, $template);
-    return $template;
+    return $template = str_replace('{connector}', $connector, $template);
   }
 
   /**
@@ -275,11 +304,13 @@ class Render extends Help {
    * @param bool $is_expanded
    *   Is this one expanded from the beginning?
    *   TRUE when we render the settings menu only.
+   * @param string $connector
+   *   The connector type to the parent class / array.
    *
-   * @return string The generated markup from the template files.
+   * @return string
    *   The generated markup from the template files.
    */
-  Public static function renderExpandableChild($name, $type, \Closure $anon_function, &$parameter, $additional = '', $dom_id = '', $help_id = '', $is_expanded = FALSE) {
+  Public static function renderExpandableChild($name, $type, \Closure $anon_function, &$parameter, $additional = '', $dom_id = '', $help_id = '', $is_expanded = FALSE, $connector = '=>') {
     // Check for emergency break.
     if (!Internals::checkEmergencyBreak()) {
       // Normally, this should not show up, because the Chunks class will not
@@ -287,6 +318,7 @@ class Render extends Help {
       Messages::addMessage("Emergency break for large output during rendering process.\n\nYou should try to switch to file output.");
       return '';
     }
+
 
     if ($name == '' && $type == '') {
       // Without a Name or Type I only display the Child with a Node.
@@ -311,6 +343,7 @@ class Render extends Help {
 
       $template = str_replace('{additional}', $additional, $template);
       $template = str_replace('{help}', self::renderHelp($help_id), $template);
+      $template = str_replace('{connector}', $connector, $template);
 
       // Is it expanded?
       if ($is_expanded) {

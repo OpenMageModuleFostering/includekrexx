@@ -7,10 +7,6 @@
 ; skin = "schablon"
 skin = "hans"
 
-; The HTML header send by kreXX. 
-; kreXX needs to send a HTML header, to minimize the interference with the template.
-doctype = "<!DOCTYPE html>"
-
 ; The path of the used js libraries.
 ; When it is not found, it will not get rendered.
 ; Normally, you want to point it to your jQuery file. The standard setting will use
@@ -18,6 +14,16 @@ doctype = "<!DOCTYPE html>"
 jsLib = "jquery-1.11.0.js"
 ; jsLib = "/../../libraries/js/jQuery/jquery-1.11.0.js"
 
+; Setting up the config for the emergency break.
+; When analysing large objects, there is always the chance that you run out of time
+; or memory. kreXX checks these values regularly.
+; kreXX checks regularly how much memory is left. Here you can adjust the amount
+; where it will trigger an emergengy break. Unit of measurement is MB.
+memoryLeft = "64"
+; 'kreXX checks during the analysis how much time has elapsed since start. Here you
+; can adjust the amount where it will trigger an emergengy break. Unit of measurement
+; is seconds.',
+maxRuntime = "60"
 
 ; ------------------------------------------------------------------------------------------
 [logging]
@@ -35,11 +41,6 @@ maxfiles = "10"
 ; Is the output the frontend or the logfolder?
 ; destination = "file"
 destination = "frontend"
-
-; Do you need to authentificate via cookie?
-; To get the cookie, simply click on the "Toggle Debug Cookie" on the frontend.
-; useCookies = "true"
-useCookies = "false"
 
 ; How often can you call kreXX in one run?
 ; kreXX can generate a lot of data, and depending on your settings
@@ -70,11 +71,6 @@ analyseProtected = "false"
 ; analysePrivate = "true"
 analysePrivate = "false"
 
-; If this is set no false, kreXX will still list the methodnames
-; Analysing public methods
-analyseMethods = "true"
-; analyseMethods = "false"
-
 ; Shall kreXX try to traverse through the object?
 analyseTraversable = "true"
 ; analyseTraversable = "false"
@@ -89,6 +85,15 @@ debugMethods = "debug,toArray,__toString,toString"
 ; When we reach a certain level, we simply stop there and won't go any further.
 level = "5"
 
+; ------------------------------------------------------------------------------------------
+[methods]
+; Here you can configure, what analysis will be done on class methods.
+analysePublicMethods = "true"
+; analysePublicMethods = "false"
+; analyseProtectedMethods = "true"
+analyseProtectedMethods = "false"
+; analysePrivateMethods = "true"
+analysePrivateMethods = "false"
 
 ; ------------------------------------------------------------------------------------------
 [errorHandling]
@@ -125,7 +130,6 @@ maxRuntime = "full"
 folder = "none"
 maxfiles = "none"
 destination = "full"
-useCookies = "none"
 maxCall = "full"
 disabled = "full"
 detectAjax = "full"

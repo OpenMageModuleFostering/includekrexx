@@ -1,17 +1,33 @@
 /**
  * @file
- * Template js functions for kreXX.
+ *   Template js functions for kreXX.
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 (function () {
@@ -130,22 +146,6 @@
       event.stopPropagation();
 
       krexx.resetSetting();
-    });
-
-    /*
-     * Register getDebugCookie on getDebugCookie Button.
-     *
-     * @event click
-     *   Toggels the debug-cookie.
-     *   When it is active, it deactivates it, ans vice versa.
-     */
-    $krexxQuery('.kwrapper .debugcookie').on('click', function (event) {
-      // Prevents the default event behavior (ie: click).
-      event.preventDefault();
-      // Prevents the event from propagating (ie: "bubbling").
-      event.stopPropagation();
-
-      krexx.toggleDebugCookie();
     });
 
     /*
@@ -634,27 +634,6 @@
   };
 
   /**
-   * Toggels the debug cookie.
-   * When the debug cookie is enabled, it switches it off.
-   * When it is disabled, is switches it on.
-   */
-  krexx.toggleDebugCookie = function () {
-    var oldValue = krexx.readSettings('KrexxDebug'), newValue;
-    var date = new Date();
-    date.setTime(date.getTime() + (99 * 24 * 60 * 60 * 1000));
-    var expires = 'expires=' + date.toUTCString();
-    if (oldValue === 'yes') {
-      newValue = 'no';
-      alert("The Debug-Cookie was deactivated.");
-    }
-    else {
-      newValue = 'yes';
-      alert("The Debug-Cookie was activated.");
-    }
-    document.cookie = 'KrexxDebug=' + newValue + '; ' + expires + '; path=/';
-  };
-
-  /**
    * Disables the editing functions, when a krexx output is loaded as a file.
    *
    * These local settings would actually do
@@ -664,6 +643,5 @@
   krexx.disableForms = function () {
     $krexxQuery('.kwrapper .editable').children().prop('disabled', true);
     $krexxQuery('.kwrapper .resetbutton').prop('disabled', true);
-    $krexxQuery('.kwrapper .debugcookie').prop('disabled', true);
   };
 })();

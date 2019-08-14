@@ -1,24 +1,38 @@
 <?php
 /**
  * @file
- * Internal processing functions for kreXX
- * kreXX: Krumo eXXtended
+ *   Internal processing functions for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 namespace Krexx;
 
-use TYPO3\CMS\Extbase\Error\Message;
 /**
  * This class hosts the internal analysis functions.
  *
@@ -94,7 +108,7 @@ class Internals {
     if (!self::checkEmergencyBreak()) {
       // No more took too long, or not enough memory is left.
       Messages::addMessage("Emergency break for large output during rendering process.\n\nYou should try to switch to file output.");
-      return;
+      return '';
     }
 
     // Object?
@@ -165,7 +179,7 @@ class Internals {
    * @return string
    *   The generated markup.
    */
-  public Static Function interateThrough(&$data) {
+  public Static Function iterateThrough(&$data) {
     $parameter = array($data);
     $analysis = function (&$parameter) {
       $output = '';
@@ -393,12 +407,10 @@ class Internals {
 
     if ($result) {
       // Check this only, if we have enough time left.
-      $limit = ini_get('memory_limit');
-      if ($limit === FALSE) {
-        // No vaule?
-        return TRUE;
-      }
+      $limit = strtoupper(ini_get('memory_limit'));
+      $memory_limit = 0;
       if (preg_match('/^(\d+)(.)$/', $limit, $matches)) {
+
         if ($matches[2] == 'M') {
           // Megabyte.
           $memory_limit = $matches[1] * 1024 * 1024;
@@ -408,10 +420,14 @@ class Internals {
           $memory_limit = $matches[1] * 1024;
         }
       }
-      $usage = memory_get_usage();
-      $left = $memory_limit - $usage;
-      // Is more left than is configured?
-      $result = $left >= (int) Config::getConfigValue('render', 'memoryLeft') * 1024 * 1024;
+
+      // Were we able to determine a limit?
+      if ($memory_limit > 2) {
+        $usage = memory_get_usage();
+        $left = $memory_limit - $usage;
+        // Is more left than is configured?
+        $result = $left >= (int) Config::getConfigValue('render', 'memoryLeft') * 1024 * 1024;
+      }
     }
 
     if (!$result) {

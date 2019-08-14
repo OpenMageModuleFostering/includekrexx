@@ -1,20 +1,34 @@
 <?php
-
 /**
  * @file
- * Magento backend block for kreXX
- * kreXX: Krumo eXXtended
+ *   Magento backend block for kreXX
+ *   kreXX: Krumo eXXtended
  *
- * This is a debugging tool, which displays structured information
- * about any PHP object. It is a nice replacement for print_r() or var_dump()
- * which are used by a lot of PHP developers.
+ *   This is a debugging tool, which displays structured information
+ *   about any PHP object. It is a nice replacement for print_r() or var_dump()
+ *   which are used by a lot of PHP developers.
+ *
+ *   kreXX is a fork of Krumo, which was originally written by:
+ *   Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ *
  * @author brainworXX GmbH <info@brainworxx.de>
  *
- * kreXX is a fork of Krumo, which was originally written by:
- * Kaloyan K. Tsvetkov <kaloyan@kaloyan.info>
+ * @license http://opensource.org/licenses/LGPL-2.1
+ *   GNU Lesser General Public License Version 2.1
  *
- * @license http://opensource.org/licenses/LGPL-2.1 GNU Lesser General Public License Version 2.1
- * @package Krexx
+ *   kreXX Copyright (C) 2014-2015 Brainworxx GmbH
+ *
+ *   This library is free software; you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation; either version 2.1 of the License, or (at
+ *   your option) any later version.
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *   for more details.
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation,
+ *   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminhtml_Block_Template {
@@ -57,7 +71,6 @@ class Brainworxx_Includekrexx_Block_Adminhtml_Edit_Feconfig extends Mage_Adminht
     $settings['logging']['folder'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('folder'));
     $settings['logging']['maxfiles'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('maxfiles'));
     $settings['output']['destination'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('destination'));
-    $settings['output']['useCookies'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('useCookies'));
     $settings['output']['maxCall'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('maxCall'));
     $settings['output']['disabled'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('disabled'));
     $settings['output']['detectAjax'] = $this->convertKrexxFeSetting(\Krexx\Config::getFeConfigFromFile('detectAjax'));
